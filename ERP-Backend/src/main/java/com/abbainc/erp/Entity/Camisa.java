@@ -11,7 +11,7 @@ public class Camisa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(nullable = false, unique = true)
     private String sku;
@@ -29,6 +29,6 @@ public class Camisa {
     @Column(nullable = false)
     private Integer quantidadeEmEstoque;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 4, scale = 2)
     private BigDecimal preco;
 }
