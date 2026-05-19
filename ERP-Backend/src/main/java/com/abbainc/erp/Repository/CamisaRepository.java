@@ -4,10 +4,6 @@ import com.abbainc.erp.Entity.Camisa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
 public interface CamisaRepository extends JpaRepository<Camisa, Integer> {
-
-    Optional<Camisa> findBySku(String sku);
 }
