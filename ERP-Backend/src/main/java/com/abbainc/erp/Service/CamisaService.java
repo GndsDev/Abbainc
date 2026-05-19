@@ -29,4 +29,31 @@ public class CamisaService {
         }
         return repository.save(camisa);
     }
+
+    public Camisa buscarPorId(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Camisa não encontrada."));
+    }
+
+    public Camisa atualizar(Integer id, Camisa camisaAtualizada) {
+        Camisa camisaExistente = buscarPorId(id);
+
+        // Atualiza os dados
+        camisaExistente.setModelo(camisaAtualizada.getModelo());
+        camisaExistente.setCor(camisaAtualizada.getCor());
+        camisaExistente.setTamanho(camisaAtualizada.getTamanho());
+        camisaExistente.setPreco(camisaAtualizada.getPreco());
+
+        // Se a quantidade em estoque foi alterada, atualizamos também
+        if (camisaAtualizada.getQuantidadeEmEstoque() != null) {
+            camisaExistente.setQuantidadeEmEstoque(camisaAtualizada.getQuantidadeEmEstoque());
+        }
+
+        return repository.save(camisaExistente);
+    }
+
+    public void deletar(Integer id) {
+        Camisa camisa = buscarPorId(id);
+        repository.delete(camisa);
+    }
 }

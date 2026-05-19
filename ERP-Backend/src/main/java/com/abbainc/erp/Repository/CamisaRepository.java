@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CamisaRepository extends JpaRepository<Camisa, Long> {
+public interface CamisaRepository extends JpaRepository<Camisa, Integer> {
 
     Optional<Camisa> findBySku(String sku);
 }

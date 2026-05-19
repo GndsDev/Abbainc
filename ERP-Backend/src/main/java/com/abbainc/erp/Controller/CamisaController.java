@@ -29,4 +29,20 @@ public class CamisaController {
         Camisa novaCamisa = service.salvar(camisa);
         return ResponseEntity.status(HttpStatus.CREATED).body(novaCamisa);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Camisa> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Camisa> atualizar(@PathVariable Integer id, @RequestBody Camisa camisa) {
+        return ResponseEntity.ok(service.atualizar(id, camisa));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Integer id) {
+        service.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
 }
