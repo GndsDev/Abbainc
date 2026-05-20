@@ -1,3 +1,76 @@
-<div class="min-h-screen bg-gray-50">
-  <router-outlet></router-outlet>
+<div class="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans">
+
+  <header class="bg-white dark:bg-neutral-950 shadow-sm dark:border-b dark:border-neutral-800 sticky top-0 z-40">
+    <div class="flex items-center justify-between px-4 h-16">
+
+      <div class="flex items-center gap-4">
+        <button (click)="toggleMenu()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <div class="flex items-center gap-2.5">
+          <img src="logo.png" alt="Logo Abbainc" class="h-10 w-auto dark:invert"> <span class="font-extrabold tracking-tight text-xl hidden sm:block">Abbainc</span>
+        </div>
+      </div>
+
+      <button (click)="toggleTema()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2 text-sm relative">
+        @if (modoEscuro()) {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+          </svg>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+          </svg>
+        }
+      </button>
+    </div>
+  </header>
+
+  <div class="flex relative">
+
+    @if (menuAberto()) {
+      <div (click)="toggleMenu()" class="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm transition-opacity"></div>
+    }
+
+    <aside
+      class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-neutral-950 md:bg-transparent border-r border-gray-100 dark:border-neutral-800 transform transition-transform duration-300 ease-in-out h-[calc(100vh-4rem)] shadow-2xl md:shadow-none"
+      [class.-translate-x-full]="!menuAberto()"
+      [class.translate-x-0]="menuAberto()">
+
+      <nav class="p-5 space-y-2.5">
+        <p class="text-[11px] uppercase font-bold text-gray-400 tracking-widest pl-4 mb-4">Gerencial</p>
+
+        <a routerLink="/vendas" routerLinkActive="bg-black text-white dark:bg-white dark:text-black shadow-lg" (click)="toggleMenu()" class="flex items-center gap-3.5 px-4 py-3 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors text-sm font-semibold group border border-transparent active:scale-95">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Ponto de Venda
+        </a>
+
+        <a routerLink="/estoque" routerLinkActive="bg-black text-white dark:bg-white dark:text-black shadow-lg" (click)="toggleMenu()" class="flex items-center gap-3.5 px-4 py-3 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors text-sm font-semibold group border border-transparent active:scale-95">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 11m8 4v10M4 11v10l8 4" />
+          </svg>
+          Estoque Abbainc
+        </a>
+
+        <a routerLink="/clientes" routerLinkActive="bg-black text-white dark:bg-white dark:text-black shadow-lg" (click)="toggleMenu()" class="flex items-center gap-3.5 px-4 py-3 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors text-sm font-semibold group border border-transparent active:scale-95">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          Clientes
+        </a>
+
+      </nav>
+    </aside>
+
+    <main class="flex-1 w-full min-w-0 transition-all duration-300">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+  <app-toast></app-toast>
 </div>

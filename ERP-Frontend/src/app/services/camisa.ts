@@ -13,4 +13,8 @@ export class CamisaService {
   listarEstoque(): Observable<Camisa[]> {
     return this.http.get<Camisa[]>(this.apiUrl);
   }
+
+  cadastrarCamisa(camisa: Partial<Camisa>): Observable<Camisa> {
+    return this.http.post<Camisa>(this.apiUrl, camisa);
+  }
 }

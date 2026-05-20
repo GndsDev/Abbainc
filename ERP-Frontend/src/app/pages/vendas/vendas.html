@@ -1,1 +1,105 @@
-<p>vendas works!</p>
+<div class="p-4 md:p-6 max-w-7xl mx-auto animate-fade-in">
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-extrabold tracking-tight text-black dark:text-white">Ponto de Venda</h1>
+    <p class="text-sm text-gray-500 dark:text-neutral-400">Toque nos produtos disponíveis para adicionar ao carrinho.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <div class="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
+      @for (camisa of estoqueDisponivel(); track $index) {
+        <div
+          class="bg-white dark:bg-neutral-900 rounded-2xl p-4 shadow-sm hover:shadow-md border border-gray-100 dark:border-neutral-800 transition-all cursor-pointer active:scale-95 group flex flex-col justify-between"
+          (click)="adicionarAoCarrinho(camisa)">
+
+          <div>
+            <h3 class="font-bold text-gray-900 dark:text-white truncate mb-0.5" title="{{ camisa.modelo }}">{{ camisa.modelo }}</h3>
+            <p class="text-xs text-gray-500 dark:text-neutral-400">{{ camisa.cor }} • Tam: <span class="font-bold">{{ camisa.tamanho }}</span></p>
+          </div>
+
+          <div class="flex justify-between items-end mt-4 pt-3 border-t border-gray-50 dark:border-neutral-800">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Estoque: {{ camisa.quantidadeEmEstoque }}</span>
+            <span class="font-black text-base text-black dark:text-white">{{ camisa.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
+          </div>
+        </div>
+      } @empty {
+        <div class="col-span-full py-12 text-center bg-gray-50 dark:bg-neutral-900 rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700">
+          <p class="text-gray-500 dark:text-neutral-400 font-medium text-sm">Nenhum produto em estoque no momento.</p>
+        </div>
+      }
+    </div>
+
+    <div class="bg-white dark:bg-neutral-900 rounded-[1.5rem] p-5 sm:p-6 shadow-xl border border-gray-100 dark:border-neutral-800 h-fit sticky top-24 flex flex-col">
+      <h2 class="text-base font-bold text-black dark:text-white mb-5 pb-3 border-b border-gray-100 dark:border-neutral-800">Carrinho atual</h2>
+
+      <div class="space-y-4 max-h-72 overflow-y-auto mb-5 pr-2 flex-1">
+        @for (item of carrinho(); track $index) {
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-bold text-sm text-gray-900 dark:text-white">{{ item.camisa.modelo }}</p>
+              <p class="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">{{ item.quantidade }}x {{ item.camisa.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-sm text-black dark:text-white">{{ item.subtotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
+              <button (click)="removerDoCarrinho(item.camisa.id!)" class="text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1" title="Remover item">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <p class="text-xs text-center text-gray-400 py-6">Toque em um produto ao lado para iniciar a venda.</p>
+        }
+      </div>
+
+      <div class="mb-5 space-y-3 pt-4 border-t border-gray-100 dark:border-neutral-800">
+
+        <div>
+          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Cliente</label>
+          <select
+            [ngModel]="clienteSelecionado()"
+            (ngModelChange)="clienteSelecionado.set($event)"
+            class="w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 rounded-xl px-3 py-2.5 text-sm text-black dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all appearance-none cursor-pointer">
+            <option [ngValue]="null" disabled selected>Selecione o cliente...</option>
+            @for (cliente of clientes(); track cliente.id) {
+              <option [ngValue]="cliente.id">{{ cliente.nome }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Pagamento</label>
+          <select
+            [ngModel]="formaPagamentoSelecionada()"
+            (ngModelChange)="formaPagamentoSelecionada.set($event)"
+            class="w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 rounded-xl px-3 py-2.5 text-sm text-black dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all appearance-none cursor-pointer">
+            <option value="PIX">PIX</option>
+            <option value="CARTAO_CREDITO">Cartão de Crédito</option>
+            <option value="CARTAO_DEBITO">Cartão de Débito</option>
+            <option value="DINHEIRO">Dinheiro</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="pt-2">
+        <div class="flex justify-between items-end mb-5">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total</span>
+          <span class="text-3xl font-black text-black dark:text-white tracking-tighter leading-none">{{ totalCarrinho() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
+        </div>
+
+        <button
+          (click)="finalizarVenda()"
+          [disabled]="carrinho().length === 0"
+          class="w-full py-3 px-6 rounded-full text-sm font-bold transition-all flex justify-center items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+          </svg>
+          Confirmar Venda
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

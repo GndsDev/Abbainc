@@ -1,3 +1,7 @@
+import { FormsModule } from '@angular/forms';
+import { ClienteService } from '../../services/cliente';
+import { Cliente } from '../../entities/cliente.entity';
+import { ToastService } from './../../services/toast';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CamisaService } from '../../services/camisa';
@@ -14,26 +18,35 @@ interface ItemCarrinho {
 @Component({
   selector: 'app-vendas',
   standalone: true,
-  imports: [CommonModule],
-  template: ``
+  imports: [CommonModule, FormsModule],
+  templateUrl: './vendas.html'
 })
 export class VendasComponent implements OnInit {
   private camisaService = inject(CamisaService);
   private pedidoService = inject(PedidoService);
+  private clienteService = inject(ClienteService);
 
+  clientes = signal<Cliente[]>([]);
   estoqueDisponivel = signal<Camisa[]>([]);
   carrinho = signal<ItemCarrinho[]>([]);
 
   clienteSelecionado = signal<number>(1);
   formaPagamentoSelecionada = signal<string>('PIX');
 
-
   totalCarrinho = computed(() => {
     return this.carrinho().reduce((acc, item) => acc + item.subtotal, 0);
   });
+  toastService: ToastService = inject(ToastService);
 
   ngOnInit() {
     this.carregarEstoque();
+    this.carregarClientes();
+  }
+
+  carregarClientes() {
+    this.clienteService.listarClientes().subscribe(dados => {
+      this.clientes.set(dados);
+    });
   }
 
   carregarEstoque() {
@@ -45,21 +58,19 @@ export class VendasComponent implements OnInit {
 
   adicionarAoCarrinho(camisa: Camisa, quantidadeDesejada: number = 1) {
     if (quantidadeDesejada > camisa.quantidadeEmEstoque) {
-      alert('Quantidade excede o estoque disponível!');
+      this.toastService.mostrar('Quantidade excede o estoque disponível!');
       return;
     }
 
     this.carrinho.update(itens => {
-
       const index = itens.findIndex(i => i.camisa.id === camisa.id);
 
       if (index !== -1) {
-
         const itensAtualizados = [...itens];
         const novaQuantidade = itensAtualizados[index].quantidade + quantidadeDesejada;
 
         if(novaQuantidade > camisa.quantidadeEmEstoque) {
-            alert('Estoque insuficiente para adicionar mais dessa camisa.');
+            this.toastService.mostrar('Estoque insuficiente para adicionar mais dessa camisa.');
             return itens;
         }
 
@@ -77,13 +88,17 @@ export class VendasComponent implements OnInit {
   }
 
   removerDoCarrinho(camisaId: number) {
-
     this.carrinho.update(itens => itens.filter(i => i.camisa.id !== camisaId));
   }
 
   finalizarVenda() {
     if (this.carrinho().length === 0) {
-      alert('O carrinho está vazio.');
+      this.toastService.mostrar('O carrinho está vazio.');
+      return;
+    }
+
+      if (!this.clienteSelecionado()) {
+      this.toastService.mostrar('Selecione um cliente para a venda.', 'erro');
       return;
     }
 
@@ -91,7 +106,6 @@ export class VendasComponent implements OnInit {
       cliente: { id: this.clienteSelecionado() },
       formaPagamento: this.formaPagamentoSelecionada(),
       itens: this.carrinho().map(item => ({
-
         camisa: { id: item.camisa.id! },
         quantidade: item.quantidade
       }))
@@ -99,12 +113,12 @@ export class VendasComponent implements OnInit {
 
     this.pedidoService.registrarVenda(payload).subscribe({
       next: () => {
-        alert('Venda finalizada com sucesso! O estoque foi baixado.');
+        this.toastService.mostrar('Venda finalizada com sucesso! O estoque foi baixado.');
         this.carrinho.set([]);
         this.carregarEstoque();
       },
       error: (erro) => {
-        alert('Falha ao processar a venda: ' + (erro.error || erro.message));
+        this.toastService.mostrar('Falha ao processar a venda: ' + (erro.error || erro.message));
       }
     });
   }
