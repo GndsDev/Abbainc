@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CamisaService } from '../../services/camisa';
 import { ToastService } from '../../services/toast';
 import { Camisa } from '../../entities/camisa.entity';
@@ -8,7 +8,7 @@ import { Camisa } from '../../entities/camisa.entity';
 @Component({
   selector: 'app-estoque',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './estoque.html'
 })
 export class EstoqueComponent implements OnInit {
@@ -19,6 +19,8 @@ export class EstoqueComponent implements OnInit {
   camisas = signal<Camisa[]>([]);
   carregando = signal(true);
 
+  termoPesquisa = signal('');
+
   modalAberto = signal(false);
 
   formCamisa: FormGroup = this.fb.group({
@@ -27,7 +29,8 @@ export class EstoqueComponent implements OnInit {
     cor: ['', Validators.required],
     tamanho: ['', Validators.required],
     preco: [0, [Validators.required, Validators.min(0.1)]],
-    quantidadeEmEstoque: [0, [Validators.required, Validators.min(0)]]
+    quantidadeEmEstoque: [0, [Validators.required, Validators.min(0)]],
+    imagemUrl: ['']
   });
 
   ngOnInit() {
@@ -76,4 +79,17 @@ export class EstoqueComponent implements OnInit {
       }
     });
   }
+
+  camisasFiltradas = computed(() => {
+    const termo = this.termoPesquisa().toLowerCase();
+    const lista = this.camisas();
+
+    if (!termo) return lista;
+
+    return lista.filter(camisa =>
+      camisa.modelo.toLowerCase().includes(termo) ||
+      camisa.sku.toLowerCase().includes(termo) ||
+      camisa.cor.toLowerCase().includes(termo)
+    );
+  });
 }

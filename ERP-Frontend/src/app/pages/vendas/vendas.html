@@ -10,17 +10,27 @@
     <div class="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
       @for (camisa of estoqueDisponivel(); track $index) {
         <div
-          class="bg-white dark:bg-neutral-900 rounded-2xl p-4 shadow-sm hover:shadow-md border border-gray-100 dark:border-neutral-800 transition-all cursor-pointer active:scale-95 group flex flex-col justify-between"
+          class="bg-white dark:bg-neutral-900 rounded-2xl p-3 shadow-sm hover:shadow-md border border-gray-100 dark:border-neutral-800 transition-all cursor-pointer active:scale-95 group flex flex-col justify-between"
           (click)="adicionarAoCarrinho(camisa)">
 
+          <div class="aspect-square w-full rounded-xl bg-gray-50 dark:bg-neutral-950 mb-3 overflow-hidden flex items-center justify-center border border-gray-100 dark:border-neutral-800/50">
+            @if (camisa.imagemUrl) {
+              <img [src]="camisa.imagemUrl" alt="{{ camisa.modelo }}" class="w-full h-full object-cover">
+            } @else {
+              <svg class="w-8 h-8 text-gray-300 dark:text-neutral-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            }
+          </div>
+
           <div>
-            <h3 class="font-bold text-gray-900 dark:text-white truncate mb-0.5" title="{{ camisa.modelo }}">{{ camisa.modelo }}</h3>
+            <h3 class="font-bold text-sm text-gray-900 dark:text-white truncate mb-0.5" title="{{ camisa.modelo }}">{{ camisa.modelo }}</h3>
             <p class="text-xs text-gray-500 dark:text-neutral-400">{{ camisa.cor }} • Tam: <span class="font-bold">{{ camisa.tamanho }}</span></p>
           </div>
 
-          <div class="flex justify-between items-end mt-4 pt-3 border-t border-gray-50 dark:border-neutral-800">
+          <div class="flex justify-between items-end mt-3 pt-2.5 border-t border-gray-50 dark:border-neutral-800">
             <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Estoque: {{ camisa.quantidadeEmEstoque }}</span>
-            <span class="font-black text-base text-black dark:text-white">{{ camisa.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
+            <span class="font-black text-sm text-black dark:text-white">{{ camisa.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
           </div>
         </div>
       } @empty {
@@ -30,10 +40,10 @@
       }
     </div>
 
-    <div class="bg-white dark:bg-neutral-900 rounded-[1.5rem] p-5 sm:p-6 shadow-xl border border-gray-100 dark:border-neutral-800 h-fit sticky top-24 flex flex-col">
-      <h2 class="text-base font-bold text-black dark:text-white mb-5 pb-3 border-b border-gray-100 dark:border-neutral-800">Carrinho atual</h2>
+    <div class="bg-white dark:bg-neutral-900 rounded-[1.5rem] p-5 shadow-xl border border-gray-100 dark:border-neutral-800 h-fit sticky top-24 flex flex-col">
+      <h2 class="text-base font-bold text-black dark:text-white mb-4 pb-3 border-b border-gray-100 dark:border-neutral-800">Carrinho atual</h2>
 
-      <div class="space-y-4 max-h-72 overflow-y-auto mb-5 pr-2 flex-1">
+      <div class="space-y-4 max-h-64 overflow-y-auto mb-4 pr-2 flex-1">
         @for (item of carrinho(); track $index) {
           <div class="flex justify-between items-center">
             <div>
@@ -54,10 +64,9 @@
         }
       </div>
 
-      <div class="mb-5 space-y-3 pt-4 border-t border-gray-100 dark:border-neutral-800">
-
+      <div class="mb-4 space-y-3 pt-3 border-t border-gray-100 dark:border-neutral-800">
         <div>
-          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Cliente</label>
+          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Cliente</label>
           <select
             [ngModel]="clienteSelecionado()"
             (ngModelChange)="clienteSelecionado.set($event)"
@@ -70,7 +79,7 @@
         </div>
 
         <div>
-          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Pagamento</label>
+          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Pagamento</label>
           <select
             [ngModel]="formaPagamentoSelecionada()"
             (ngModelChange)="formaPagamentoSelecionada.set($event)"
@@ -81,13 +90,12 @@
             <option value="DINHEIRO">Dinheiro</option>
           </select>
         </div>
-
       </div>
 
       <div class="pt-2">
-        <div class="flex justify-between items-end mb-5">
+        <div class="flex justify-between items-end mb-4">
           <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Total</span>
-          <span class="text-3xl font-black text-black dark:text-white tracking-tighter leading-none">{{ totalCarrinho() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
+          <span class="text-2xl font-black text-black dark:text-white tracking-tighter leading-none">{{ totalCarrinho() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
         </div>
 
         <button

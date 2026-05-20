@@ -1,6 +1,6 @@
 <div class="p-4 md:p-6 max-w-7xl mx-auto animate-fade-in">
 
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
     <div>
       <h1 class="text-2xl font-extrabold tracking-tight text-black dark:text-white">Estoque Abbainc</h1>
       <p class="text-sm text-gray-500 dark:text-neutral-400">Gerencie as camisas disponíveis no sistema.</p>
@@ -16,6 +16,21 @@
     </button>
   </div>
 
+  <div class="mb-6 animate-fade-in relative">
+    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+      <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+    <input
+      type="text"
+      [ngModel]="termoPesquisa()"
+      (ngModelChange)="termoPesquisa.set($event)"
+      placeholder="Pesquisar por modelo, SKU ou cor..."
+      class="w-full pl-12 pr-4 py-3 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-2xl text-sm text-black dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all shadow-sm"
+    >
+  </div>
+
   @if (carregando()) {
     <div class="flex flex-col justify-center items-center py-20 gap-4">
       <div class="w-8 h-8 border-4 border-gray-200 border-t-black dark:border-neutral-800 dark:border-t-white rounded-full animate-spin"></div>
@@ -25,24 +40,35 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-      @for (camisa of camisas(); track camisa.id) {
-        <div class="bg-white dark:bg-neutral-900 rounded-3xl shadow-sm border border-gray-100 dark:border-neutral-800 p-6 flex flex-col hover:shadow-lg transition-shadow">
-          <div class="mb-4">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-white truncate" title="{{ camisa.modelo }}">
+      @for (camisa of camisasFiltradas(); track camisa.id) {
+        <div class="bg-white dark:bg-neutral-900 rounded-3xl shadow-sm border border-gray-100 dark:border-neutral-800 p-4 flex flex-col hover:shadow-lg transition-shadow">
+
+          <div class="aspect-square w-full rounded-2xl bg-gray-50 dark:bg-neutral-950 mb-4 overflow-hidden flex items-center justify-center relative group border border-gray-100 dark:border-neutral-800/50">
+            @if (camisa.imagemUrl) {
+              <img [src]="camisa.imagemUrl" alt="{{ camisa.modelo }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+            } @else {
+              <svg class="w-10 h-10 text-gray-300 dark:text-neutral-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            }
+          </div>
+
+          <div class="mb-3">
+            <h2 class="text-base font-bold text-gray-900 dark:text-white truncate" title="{{ camisa.modelo }}">
               {{ camisa.modelo }}
             </h2>
           </div>
 
-          <div class="space-y-1.5 mb-6 flex-1">
-            <p class="text-xs text-gray-500 dark:text-neutral-400">SKU: <span class="font-mono bg-gray-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-black dark:text-white">{{ camisa.sku }}</span></p>
+          <div class="space-y-1 mb-4 flex-1">
+            <p class="text-xs text-gray-500 dark:text-neutral-400">SKU: <span class="font-mono bg-gray-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-black dark:text-white text-[11px]">{{ camisa.sku }}</span></p>
             <p class="text-xs text-gray-500 dark:text-neutral-400">Cor: <span class="font-medium text-gray-900 dark:text-white">{{ camisa.cor }}</span></p>
             <p class="text-xs text-gray-500 dark:text-neutral-400">Tamanho: <span class="font-bold text-gray-900 dark:text-white">{{ camisa.tamanho }}</span></p>
           </div>
 
-          <div class="flex justify-between items-end pt-4 border-t border-gray-50 dark:border-neutral-800">
+          <div class="flex justify-between items-end pt-3 border-t border-gray-50 dark:border-neutral-800">
             <div>
-              <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Quantidade</p>
-              <p class="font-black text-2xl"
+              <p class="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Quantidade</p>
+              <p class="font-black text-xl"
                  [class.text-red-500]="camisa.quantidadeEmEstoque < 10"
                  [class.text-black]="camisa.quantidadeEmEstoque >= 10"
                  [class.dark:text-white]="camisa.quantidadeEmEstoque >= 10">
@@ -50,14 +76,14 @@
               </p>
             </div>
             <div class="text-right">
-              <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Preço</p>
-              <p class="font-bold text-lg text-black dark:text-white">{{ camisa.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</p>
+              <p class="text-[9px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Preço</p>
+              <p class="font-bold text-base text-black dark:text-white">{{ camisa.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</p>
             </div>
           </div>
         </div>
       } @empty {
         <div class="col-span-full bg-gray-50 dark:bg-neutral-900 rounded-[2rem] p-12 text-center border border-dashed border-gray-300 dark:border-neutral-700">
-          <p class="text-gray-500 dark:text-neutral-400 font-medium">O estoque está vazio.</p>
+          <p class="text-gray-500 dark:text-neutral-400 font-medium text-sm">Nenhum produto corresponde à busca ou o estoque está vazio.</p>
         </div>
       }
 
@@ -66,7 +92,6 @@
 
   @if (modalAberto()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" (click)="fecharModal()"></div>
 
       <div class="relative bg-white dark:bg-neutral-900 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in border border-gray-100 dark:border-neutral-800">
@@ -74,9 +99,7 @@
         <div class="px-6 py-4 border-b border-gray-100 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-lg font-bold text-black dark:text-white">Cadastrar Nova Camisa</h3>
           <button (click)="fecharModal()" class="text-gray-400 hover:text-black dark:hover:text-white transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
 
@@ -120,16 +143,18 @@
               <input type="number" step="0.01" formControlName="preco" class="w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-black dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all">
             </div>
 
+            <div class="col-span-full">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">URL da Imagem do Produto</label>
+              <input type="text" formControlName="imagemUrl" placeholder="Ex: produtos/camisa-preta.png ou link da internet" class="w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-black dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all">
+            </div>
+
           </div>
 
           <div class="flex gap-3 justify-end mt-4">
             <button type="button" (click)="fecharModal()" class="px-6 py-2.5 rounded-full font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors">
               Cancelar
             </button>
-            <button
-              type="submit"
-              [disabled]="formCamisa.invalid"
-              class="px-6 py-2.5 rounded-full font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="submit" [disabled]="formCamisa.invalid" class="px-6 py-2.5 rounded-full font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
               Salvar Camisa
             </button>
           </div>

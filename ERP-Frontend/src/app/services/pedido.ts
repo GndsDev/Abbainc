@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { PedidoDTO } from '../entities/pedido.entity';
+import { PedidoDTO, Pedido } from '../entities/pedido.entity';
 
 @Injectable({
   providedIn: 'root'
@@ -12,5 +12,9 @@ export class PedidoService {
 
   registrarVenda(pedido: PedidoDTO): Observable<any> {
     return this.http.post(this.apiUrl, pedido);
+  }
+
+  listarHistorico(): Observable<Pedido[]> {
+    return this.http.get<Pedido[]>(this.apiUrl);
   }
 }

@@ -6,4 +6,5 @@ export interface Camisa {
   tamanho: string;
   quantidadeEmEstoque: number;
   preco: number;
+  imagemUrl?: string;
 }
