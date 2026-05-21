@@ -35,7 +35,7 @@ public class PedidoService {
         pedido.setCliente(cliente);
 
         for (ItemPedido item : pedido.getItens()) {
-            // Busca a camisa no banco
+
             Camisa camisa = camisaRepository.findById(item.getCamisa().getId())
                     .orElseThrow(() -> new RuntimeException("Camisa não encontrada."));
 
@@ -59,5 +59,9 @@ public class PedidoService {
 
         pedido.setStatus(novoStatus);
         return pedidoRepository.save(pedido);
+    }
+    public Pedido buscarPorId(Integer id) {
+        return pedidoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
     }
 }

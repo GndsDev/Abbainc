@@ -20,11 +20,12 @@ export class ClientesComponent implements OnInit {
   carregando = signal(true);
   modalAberto = signal(false);
 
+  clienteIdEmEdicao = signal<number | null>(null);
+
   formCliente: FormGroup = this.fb.group({
     nome: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    telefone: ['', Validators.required],
-    cpfCnpj: ['']
+    whatsapp: ['', Validators.required],
+    endereco: ['']
   });
 
   ngOnInit() {
@@ -47,6 +48,19 @@ export class ClientesComponent implements OnInit {
 
   abrirModal() {
     this.formCliente.reset();
+    this.clienteIdEmEdicao.set(null);
+    this.modalAberto.set(true);
+  }
+
+  abrirModalEdicao(cliente: Cliente) {
+    this.clienteIdEmEdicao.set(cliente.id!);
+
+    this.formCliente.patchValue({
+      nome: cliente.nome,
+      whatsapp: cliente.whatsapp,
+      endereco: cliente.endereco
+    });
+
     this.modalAberto.set(true);
   }
 
@@ -60,17 +74,32 @@ export class ClientesComponent implements OnInit {
       return;
     }
 
-    const novoCliente = this.formCliente.value;
+    const dadosFormulario = this.formCliente.value;
+    const idEdicao = this.clienteIdEmEdicao();
 
-    this.clienteService.cadastrarCliente(novoCliente).subscribe({
-      next: () => {
-        this.toastService.mostrar('Cliente cadastrado com sucesso!', 'sucesso');
-        this.fecharModal();
-        this.carregarClientes();
-      },
-      error: (erro) => {
-        this.toastService.mostrar('Falha ao cadastrar: ' + (erro.error || erro.message), 'erro');
-      }
-    });
+    if (idEdicao) {
+      this.clienteService.atualizar(idEdicao, dadosFormulario).subscribe({
+        next: () => {
+          this.toastService.mostrar('Cliente atualizado com sucesso!', 'sucesso');
+          this.fecharModal();
+          this.carregarClientes();
+        },
+        error: (erro) => {
+          this.toastService.mostrar('Falha ao atualizar: ' + (erro.error || erro.message), 'erro');
+        }
+      });
+    }
+    else {
+      this.clienteService.cadastrarCliente(dadosFormulario).subscribe({
+        next: () => {
+          this.toastService.mostrar('Cliente cadastrado com sucesso!', 'sucesso');
+          this.fecharModal();
+          this.carregarClientes();
+        },
+        error: (erro) => {
+          this.toastService.mostrar('Falha ao cadastrar: ' + (erro.error || erro.message), 'erro');
+        }
+      });
+    }
   }
 }

@@ -23,4 +23,15 @@ public class ClienteService {
     public Cliente salvar(Cliente cliente) {
         return repository.save(cliente);
     }
+
+    public Cliente atualizar(Integer id, Cliente dadosAtualizados) {
+        Cliente clienteExistente = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: " + id));
+
+        clienteExistente.setNome(dadosAtualizados.getNome());
+        clienteExistente.setWhatsapp(dadosAtualizados.getWhatsapp());
+        clienteExistente.setEndereco(dadosAtualizados.getEndereco());
+
+        return repository.save(clienteExistente);
+    }
 }

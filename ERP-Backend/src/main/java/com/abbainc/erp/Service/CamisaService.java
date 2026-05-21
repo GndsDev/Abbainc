@@ -38,13 +38,14 @@ public class CamisaService {
     public Camisa atualizar(Integer id, Camisa camisaAtualizada) {
         Camisa camisaExistente = buscarPorId(id);
 
-        // Atualiza os dados
         camisaExistente.setModelo(camisaAtualizada.getModelo());
         camisaExistente.setCor(camisaAtualizada.getCor());
         camisaExistente.setTamanho(camisaAtualizada.getTamanho());
         camisaExistente.setPreco(camisaAtualizada.getPreco());
 
-        // Se a quantidade em estoque foi alterada, atualizamos também
+        camisaExistente.setSku(camisaAtualizada.getSku());
+        camisaExistente.setImagemUrl(camisaAtualizada.getImagemUrl());
+        
         if (camisaAtualizada.getQuantidadeEmEstoque() != null) {
             camisaExistente.setQuantidadeEmEstoque(camisaAtualizada.getQuantidadeEmEstoque());
         }

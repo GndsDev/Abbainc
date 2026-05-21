@@ -34,4 +34,25 @@ export class HistoricoComponent implements OnInit {
       }
     });
   }
+
+  imprimirRecibo(pedido: Pedido) {
+    this.toastService.mostrar('Gerando recibo...', 'info');
+
+    this.pedidoService.baixarReciboPdf(pedido.id!).subscribe({
+      next: (arquivoBlob) => {
+        const url = window.URL.createObjectURL(arquivoBlob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Recibo_Abbainc_Pedido_${pedido.id}.pdf`;
+        link.click();
+
+        window.URL.revokeObjectURL(url);
+        this.toastService.mostrar('Recibo baixado com sucesso!', 'sucesso');
+      },
+      error: () => {
+        this.toastService.mostrar('Erro ao gerar o recibo.', 'erro');
+      }
+    });
+  }
 }

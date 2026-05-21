@@ -29,7 +29,7 @@ public class Camisa {
     @Column(nullable = false)
     private Integer quantidadeEmEstoque;
 
-    @Column(nullable = false, precision = 4, scale = 2)
+    @Column(nullable = false, precision = 8, scale = 2)
     private BigDecimal preco;
 
     @Column(name = "imagem_url")

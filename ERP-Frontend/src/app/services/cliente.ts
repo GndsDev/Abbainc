@@ -17,4 +17,8 @@ export class ClienteService {
   cadastrarCliente(cliente: Partial<Cliente>): Observable<Cliente> {
     return this.http.post<Cliente>(this.apiUrl, cliente);
   }
+
+  atualizar(id: number, cliente: Cliente) {
+    return this.http.put<Cliente>(`${this.apiUrl}/${id}`, cliente);
+  }
 }

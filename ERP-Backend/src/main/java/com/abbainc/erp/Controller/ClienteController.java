@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/clientes")
-@CrossOrigin(origins = "http://localhost:4200")
 public class ClienteController {
 
     private final ClienteService service;
@@ -27,5 +26,11 @@ public class ClienteController {
     @PostMapping
     public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente cliente) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(cliente));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Cliente> atualizar(@PathVariable Integer id, @RequestBody Cliente cliente) {
+        Cliente clienteAtualizado = service.atualizar(id, cliente);
+        return ResponseEntity.ok(clienteAtualizado);
     }
 }

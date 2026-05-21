@@ -40,4 +40,20 @@ public class Pedido {
             this.status = StatusPedido.PENDENTE;
         }
     }
+
+    public java.math.BigDecimal getTotalPedido() {
+        if (this.itens == null || this.itens.isEmpty()) {
+            return java.math.BigDecimal.ZERO;
+        }
+
+        java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+
+        for (ItemPedido item : this.itens) {
+            if (item.getSubtotal() != null) {
+                total = total.add(item.getSubtotal());
+            }
+        }
+
+        return total;
+    }
 }

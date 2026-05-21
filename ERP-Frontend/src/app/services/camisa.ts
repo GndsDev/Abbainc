@@ -17,4 +17,12 @@ export class CamisaService {
   cadastrarCamisa(camisa: Partial<Camisa>): Observable<Camisa> {
     return this.http.post<Camisa>(this.apiUrl, camisa);
   }
+
+  atualizarCamisa(id: number, camisa: Partial<Camisa>): Observable<Camisa> {
+    return this.http.put<Camisa>(`${this.apiUrl}/${id}`, camisa);
+  }
+
+  excluirCamisa(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

@@ -17,4 +17,8 @@ export class PedidoService {
   listarHistorico(): Observable<Pedido[]> {
     return this.http.get<Pedido[]>(this.apiUrl);
   }
+
+  baixarReciboPdf(pedidoId: number) {
+    return this.http.get(`${this.apiUrl}/${pedidoId}/recibo`, { responseType: 'blob' });
+  }
 }

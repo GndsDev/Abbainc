@@ -1,14 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Estoque } from './estoque';
+import { EstoqueComponent } from './estoque';
 
 describe('Estoque', () => {
-  let component: Estoque;
-  let fixture: ComponentFixture<Estoque>;
+  let component: EstoqueComponent;
+  let fixture: ComponentFixture<EstoqueComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Estoque]
+      declarations: [EstoqueComponent]
     })
     .compileComponents();
 

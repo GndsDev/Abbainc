@@ -26,6 +26,13 @@ public class ItemPedido {
     @Column(nullable = false)
     private Integer quantidade;
 
-    @Column(nullable = false, precision = 4, scale = 2)
+    @Column(nullable = false, precision = 8, scale = 2)
     private BigDecimal precoUnitario;
+
+    public java.math.BigDecimal getSubtotal() {
+        if (this.quantidade != null && this.precoUnitario != null) {
+            return this.precoUnitario.multiply(java.math.BigDecimal.valueOf(this.quantidade));
+        }
+        return java.math.BigDecimal.ZERO;
+    }
 }
