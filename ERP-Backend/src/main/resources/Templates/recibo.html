@@ -273,8 +273,8 @@
         <tbody>
         <tr th:each="item : ${pedido.itens}">
             <td>
-                <p class="item-name" th:text="${item.camisa.modelo}">NOME DA CAMISA</p>
-                <p class="item-details" th:text="'Cor: ' + ${item.camisa.cor} + ' | Tamanho: ' + ${item.camisa.tamanho}">Cor | Tam</p>
+                <p class="item-name" th:text="${item.variacaoProduto.produto.modelo}">NOME DA CAMISA</p>
+                <p class="item-details" th:text="'Cor: ' + ${item.variacaoProduto.produto.cor} + ' | Tamanho: ' + ${item.variacaoProduto.tamanho}">Cor | Tam</p>
             </td>
             <td style="text-align: center; font-size: 11pt; font-weight: bold;" th:text="${item.quantidade}">1</td>
             <td style="text-align: right;" th:text="'R$ ' + ${#numbers.formatDecimal(item.precoUnitario, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>

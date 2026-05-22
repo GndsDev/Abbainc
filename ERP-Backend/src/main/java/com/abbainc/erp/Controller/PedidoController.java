@@ -59,4 +59,10 @@ public class PedidoController {
 
         return new ResponseEntity<>(pdfBytes, headers, org.springframework.http.HttpStatus.OK);
     }
+
+    @PostMapping("/{id}/recibo/email")
+    public ResponseEntity<Void> enviarReciboPorEmail(@PathVariable @Positive(message = "ID do pedido deve ser positivo.") Integer id) {
+        service.enviarReciboPorEmail(id);
+        return ResponseEntity.noContent().build();
+    }
 }

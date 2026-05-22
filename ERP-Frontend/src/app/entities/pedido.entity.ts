@@ -1,10 +1,10 @@
-import { Camisa } from './camisa.entity';
+import { Produto, VariacaoProduto } from './produto.entity';
 import { Cliente } from './cliente.entity';
 
 export interface PedidoDTO {
   cliente: { id: number };
   formaPagamento: string;
-  itens: { camisa: { id: number }, quantidade: number }[];
+  itens: { variacaoProduto: { id: number }, quantidade: number }[];
 }
 
 export interface Pedido {
@@ -15,7 +15,7 @@ export interface Pedido {
   totalPedido: number;
   itens: {
     id: number;
-    camisa: Camisa;
+    variacaoProduto: VariacaoProduto & { produto?: Produto };
     quantidade: number;
     precoUnitario: number;
     subtotal: number;

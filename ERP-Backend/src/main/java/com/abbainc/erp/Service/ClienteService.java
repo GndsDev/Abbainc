@@ -39,6 +39,7 @@ public class ClienteService {
     private void preencherCliente(Cliente cliente, ClienteRequest request) {
         cliente.setNome(normalizar(request.nome()));
         cliente.setWhatsapp(normalizar(request.whatsapp()));
+        cliente.setEmail(normalizarOpcional(request.email()));
         cliente.setEndereco(normalizarOpcional(request.endereco()));
     }
 

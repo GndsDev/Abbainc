@@ -8,14 +8,14 @@
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
     <div class="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
-      @for (camisa of estoqueDisponivel(); track $index) {
+      @for (item of estoqueDisponivel(); track item.id) {
         <div
           class="bg-white dark:bg-neutral-900 rounded-2xl p-3 shadow-sm hover:shadow-md border border-gray-100 dark:border-neutral-800 transition-all cursor-pointer active:scale-95 group flex flex-col justify-between"
-          (click)="adicionarAoCarrinho(camisa)">
+          (click)="adicionarAoCarrinho(item)">
 
           <div class="aspect-square w-full rounded-xl bg-gray-50 dark:bg-neutral-950 mb-3 overflow-hidden flex items-center justify-center border border-gray-100 dark:border-neutral-800/50">
-            @if (camisa.imagemUrl) {
-              <img [src]="camisa.imagemUrl" alt="{{ camisa.modelo }}" class="w-full h-full object-cover">
+            @if (item.imagemUrl) {
+              <img [src]="item.imagemUrl" alt="{{ item.modelo }}" class="w-full h-full object-cover">
             } @else {
               <svg class="w-8 h-8 text-gray-300 dark:text-neutral-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -24,13 +24,13 @@
           </div>
 
           <div>
-            <h3 class="font-bold text-sm text-gray-900 dark:text-white truncate mb-0.5" title="{{ camisa.modelo }}">{{ camisa.modelo }}</h3>
-            <p class="text-xs text-gray-500 dark:text-neutral-400">{{ camisa.cor }} • Tam: <span class="font-bold">{{ camisa.tamanho }}</span></p>
+            <h3 class="font-bold text-sm text-gray-900 dark:text-white truncate mb-0.5" title="{{ item.modelo }}">{{ item.modelo }}</h3>
+            <p class="text-xs text-gray-500 dark:text-neutral-400">{{ item.cor }} • Tam: <span class="font-bold">{{ item.tamanho }}</span></p>
           </div>
 
           <div class="flex justify-between items-end mt-3 pt-2.5 border-t border-gray-50 dark:border-neutral-800">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Estoque: {{ camisa.quantidadeEmEstoque }}</span>
-            <span class="font-black text-sm text-black dark:text-white">{{ camisa.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Estoque: {{ item.quantidadeEmEstoque }}</span>
+            <span class="font-black text-sm text-black dark:text-white">{{ item.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
           </div>
         </div>
       } @empty {
@@ -47,12 +47,12 @@
         @for (item of carrinho(); track $index) {
           <div class="flex justify-between items-center">
             <div>
-              <p class="font-bold text-sm text-gray-900 dark:text-white">{{ item.camisa.modelo }}</p>
-              <p class="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">{{ item.quantidade }}x {{ item.camisa.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</p>
+              <p class="font-bold text-sm text-gray-900 dark:text-white">{{ item.item.modelo }}</p>
+              <p class="text-xs text-gray-500 dark:text-neutral-400 mt-0.5">{{ item.quantidade }}x {{ item.item.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</p>
             </div>
             <div class="flex items-center gap-3">
               <span class="font-bold text-sm text-black dark:text-white">{{ item.subtotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>
-              <button (click)="removerDoCarrinho(item.camisa.id!)" class="text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1" title="Remover item">
+              <button (click)="removerDoCarrinho(item.item.id!)" class="text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1" title="Remover item">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>

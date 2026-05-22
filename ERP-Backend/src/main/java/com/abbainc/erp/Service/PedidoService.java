@@ -3,9 +3,9 @@ package com.abbainc.erp.Service;
 
 import com.abbainc.erp.DTO.PedidoRequest;
 import com.abbainc.erp.Entity.*;
-import com.abbainc.erp.Repository.CamisaRepository;
 import com.abbainc.erp.Repository.ClienteRepository;
 import com.abbainc.erp.Repository.PedidoRepository;
+import com.abbainc.erp.Repository.VariacaoProdutoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +15,17 @@ import java.util.List;
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
-    private final CamisaRepository camisaRepository;
+    private final VariacaoProdutoRepository variacaoProdutoRepository;
     private final ClienteRepository clienteRepository;
+    private final RelatorioService relatorioService;
+    private final EmailService emailService;
 
-    public PedidoService(PedidoRepository pedidoRepository, CamisaRepository camisaRepository, ClienteRepository clienteRepository) {
+    public PedidoService(PedidoRepository pedidoRepository, VariacaoProdutoRepository variacaoProdutoRepository, ClienteRepository clienteRepository, RelatorioService relatorioService, EmailService emailService) {
         this.pedidoRepository = pedidoRepository;
-        this.camisaRepository = camisaRepository;
+        this.variacaoProdutoRepository = variacaoProdutoRepository;
         this.clienteRepository = clienteRepository;
+        this.relatorioService = relatorioService;
+        this.emailService = emailService;
     }
 
     public List<Pedido> listarTodos() {
@@ -46,25 +50,28 @@ public class PedidoService {
                 throw new IllegalArgumentException("Quantidade deve ser maior que zero.");
             }
 
-            Camisa camisa = camisaRepository.findById(itemRequest.camisa().id())
-                    .orElseThrow(() -> new RuntimeException("Camisa não encontrada."));
+            VariacaoProduto variacao = variacaoProdutoRepository.findById(itemRequest.variacaoProduto().id())
+                    .orElseThrow(() -> new RuntimeException("Variação do produto não encontrada."));
 
-            if (camisa.getQuantidadeEmEstoque() < quantidade) {
-                throw new RuntimeException("Estoque insuficiente para a camisa: " + camisa.getModelo());
+            if (variacao.getQuantidadeEmEstoque() < quantidade) {
+                throw new RuntimeException("Estoque insuficiente para o produto: " + variacao.getProduto().getModelo());
             }
 
-            camisa.setQuantidadeEmEstoque(camisa.getQuantidadeEmEstoque() - quantidade);
-            camisaRepository.save(camisa);
+            variacao.setQuantidadeEmEstoque(variacao.getQuantidadeEmEstoque() - quantidade);
+            variacaoProdutoRepository.save(variacao);
 
             ItemPedido item = new ItemPedido();
-            item.setCamisa(camisa);
+            item.setVariacaoProduto(variacao);
             item.setQuantidade(quantidade);
-            item.setPrecoUnitario(camisa.getPreco());
+            item.setPrecoUnitario(variacao.getProduto().getPreco());
             item.setPedido(pedido);
             pedido.getItens().add(item);
         }
 
-        return pedidoRepository.save(pedido);
+        Pedido pedidoSalvo = pedidoRepository.save(pedido);
+        enviarReciboAutomatico(pedidoSalvo);
+
+        return pedidoSalvo;
     }
 
     public Pedido atualizarStatus(Integer id, StatusPedido novoStatus) {
@@ -77,5 +84,28 @@ public class PedidoService {
     public Pedido buscarPorId(Integer id) {
         return pedidoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
+    }
+
+    public void enviarReciboPorEmail(Integer id) {
+        Pedido pedido = buscarPorId(id);
+        enviarRecibo(pedido);
+    }
+
+    private void enviarReciboAutomatico(Pedido pedido) {
+        if (!emailService.estaHabilitado()) {
+            return;
+        }
+
+        String email = pedido.getCliente().getEmail();
+        if (email == null || email.isBlank()) {
+            return;
+        }
+
+        enviarRecibo(pedido);
+    }
+
+    private void enviarRecibo(Pedido pedido) {
+        byte[] pdfBytes = relatorioService.gerarReciboPdf(pedido);
+        emailService.enviarReciboComAnexo(pedido.getCliente().getEmail(), pdfBytes);
     }
 }

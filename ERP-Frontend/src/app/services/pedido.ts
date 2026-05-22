@@ -22,4 +22,8 @@ export class PedidoService {
   baixarReciboPdf(pedidoId: number) {
     return this.http.get(`${this.apiUrl}/${pedidoId}/recibo`, { responseType: 'blob' });
   }
+
+  enviarReciboPorEmail(pedidoId: number) {
+    return this.http.post<void>(`${this.apiUrl}/${pedidoId}/recibo/email`, {});
+  }
 }

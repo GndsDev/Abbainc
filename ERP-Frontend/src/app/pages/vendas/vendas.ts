@@ -4,13 +4,13 @@ import { Cliente } from '../../entities/cliente.entity';
 import { ToastService } from './../../services/toast';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CamisaService } from '../../services/camisa';
+import { ProdutoService } from '../../services/produto';
 import { PedidoService } from '../../services/pedido';
-import { Camisa } from '../../entities/camisa.entity';
+import { ItemEstoque, Produto } from '../../entities/produto.entity';
 import { PedidoDTO } from '../../entities/pedido.entity';
 
 interface ItemCarrinho {
-  camisa: Camisa;
+  item: ItemEstoque;
   quantidade: number;
   subtotal: number;
 }
@@ -22,12 +22,12 @@ interface ItemCarrinho {
   templateUrl: './vendas.html'
 })
 export class VendasComponent implements OnInit {
-  private camisaService = inject(CamisaService);
+  private produtoService = inject(ProdutoService);
   private pedidoService = inject(PedidoService);
   private clienteService = inject(ClienteService);
 
   clientes = signal<Cliente[]>([]);
-  estoqueDisponivel = signal<Camisa[]>([]);
+  estoqueDisponivel = signal<ItemEstoque[]>([]);
   carrinho = signal<ItemCarrinho[]>([]);
 
   clienteSelecionado = signal<number>(1);
@@ -50,45 +50,44 @@ export class VendasComponent implements OnInit {
   }
 
   carregarEstoque() {
-    this.camisaService.listarEstoque().subscribe(dados => {
-
-      this.estoqueDisponivel.set(dados.filter(c => c.quantidadeEmEstoque > 0));
+    this.produtoService.listarProdutos().subscribe(dados => {
+      this.estoqueDisponivel.set(this.criarItensEstoque(dados).filter(item => item.quantidadeEmEstoque > 0));
     });
   }
 
-  adicionarAoCarrinho(camisa: Camisa, quantidadeDesejada: number = 1) {
-    if (quantidadeDesejada > camisa.quantidadeEmEstoque) {
+  adicionarAoCarrinho(item: ItemEstoque, quantidadeDesejada: number = 1) {
+    if (quantidadeDesejada > item.quantidadeEmEstoque) {
       this.toastService.mostrar('Quantidade excede o estoque disponível!');
       return;
     }
 
     this.carrinho.update(itens => {
-      const index = itens.findIndex(i => i.camisa.id === camisa.id);
+      const index = itens.findIndex(i => i.item.id === item.id);
 
       if (index !== -1) {
         const itensAtualizados = [...itens];
         const novaQuantidade = itensAtualizados[index].quantidade + quantidadeDesejada;
 
-        if(novaQuantidade > camisa.quantidadeEmEstoque) {
-            this.toastService.mostrar('Estoque insuficiente para adicionar mais dessa camisa.');
-            return itens;
+        if (novaQuantidade > item.quantidadeEmEstoque) {
+          this.toastService.mostrar('Estoque insuficiente para adicionar mais desse produto.');
+          return itens;
         }
 
         itensAtualizados[index].quantidade = novaQuantidade;
-        itensAtualizados[index].subtotal = novaQuantidade * camisa.preco;
+        itensAtualizados[index].subtotal = novaQuantidade * item.preco;
         return itensAtualizados;
       }
 
       return [...itens, {
-        camisa,
+        item,
         quantidade: quantidadeDesejada,
-        subtotal: camisa.preco * quantidadeDesejada
+        subtotal: item.preco * quantidadeDesejada
       }];
     });
   }
 
-  removerDoCarrinho(camisaId: number) {
-    this.carrinho.update(itens => itens.filter(i => i.camisa.id !== camisaId));
+  removerDoCarrinho(variacaoId: number) {
+    this.carrinho.update(itens => itens.filter(i => i.item.id !== variacaoId));
   }
 
   finalizarVenda() {
@@ -97,7 +96,7 @@ export class VendasComponent implements OnInit {
       return;
     }
 
-      if (!this.clienteSelecionado()) {
+    if (!this.clienteSelecionado()) {
       this.toastService.mostrar('Selecione um cliente para a venda.', 'erro');
       return;
     }
@@ -106,7 +105,7 @@ export class VendasComponent implements OnInit {
       cliente: { id: this.clienteSelecionado() },
       formaPagamento: this.formaPagamentoSelecionada(),
       itens: this.carrinho().map(item => ({
-        camisa: { id: item.camisa.id! },
+        variacaoProduto: { id: item.item.id! },
         quantidade: item.quantidade
       }))
     };
@@ -121,5 +120,21 @@ export class VendasComponent implements OnInit {
         this.toastService.mostrar('Falha ao processar a venda: ' + (erro.error || erro.message));
       }
     });
+  }
+
+  private criarItensEstoque(produtos: Produto[]) {
+    return produtos.flatMap(produto =>
+      produto.variacoes.map(variacao => ({
+        id: variacao.id,
+        produtoId: produto.id,
+        modelo: produto.modelo,
+        cor: produto.cor,
+        tamanho: variacao.tamanho,
+        sku: variacao.sku,
+        quantidadeEmEstoque: variacao.quantidadeEmEstoque,
+        preco: produto.preco,
+        imagemUrl: produto.imagemUrl
+      }))
+    );
   }
 }

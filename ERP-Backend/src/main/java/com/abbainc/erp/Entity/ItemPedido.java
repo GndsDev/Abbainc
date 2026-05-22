@@ -20,8 +20,8 @@ public class ItemPedido {
     private Pedido pedido;
 
     @ManyToOne
-    @JoinColumn(name = "camisa_id", nullable = false)
-    private Camisa camisa;
+    @JoinColumn(name = "variacao_produto_id", nullable = false)
+    private VariacaoProduto variacaoProduto;
 
     @Column(nullable = false)
     private Integer quantidade;

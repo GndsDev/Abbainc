@@ -28,9 +28,9 @@ public record PedidoRequest(
     }
 
     public record ItemRequest(
-            @NotNull(message = "Camisa é obrigatória.")
+            @NotNull(message = "Variação do produto é obrigatória.")
             @Valid
-            CamisaRef camisa,
+            VariacaoProdutoRef variacaoProduto,
 
             @NotNull(message = "Quantidade é obrigatória.")
             @Positive(message = "Quantidade deve ser maior que zero.")
@@ -38,9 +38,9 @@ public record PedidoRequest(
     ) {
     }
 
-    public record CamisaRef(
-            @NotNull(message = "ID da camisa é obrigatório.")
-            @Positive(message = "ID da camisa deve ser positivo.")
+    public record VariacaoProdutoRef(
+            @NotNull(message = "ID da variação do produto é obrigatório.")
+            @Positive(message = "ID da variação do produto deve ser positivo.")
             Integer id
     ) {
     }

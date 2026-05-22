@@ -3,7 +3,7 @@
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
     <div>
       <h1 class="text-2xl font-extrabold tracking-tight text-black dark:text-white">Estoque Abbainc</h1>
-      <p class="text-sm text-gray-500 dark:text-neutral-400">Gerencie as camisas e grades disponíveis no sistema.</p>
+      <p class="text-sm text-gray-500 dark:text-neutral-400">Gerencie os produtos, imagens e grades disponíveis no sistema.</p>
     </div>
 
     <button
@@ -12,7 +12,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
-      Nova Camisa
+      Novo Produto
     </button>
   </div>
 
@@ -40,15 +40,15 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
-      @for (grupo of camisasAgrupadas(); track grupo.sku) {
+      @for (produto of produtosFiltrados(); track produto.id) {
 
         <div class="bg-white dark:bg-neutral-900 rounded-3xl shadow-sm border border-gray-100 dark:border-neutral-800 flex flex-col hover:shadow-lg transition-shadow relative group overflow-hidden">
 
           <div class="absolute top-4 right-4 z-10 flex flex-col gap-2 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              (click)="abrirModal({ id: grupo.grade[0].id, sku: grupo.sku, modelo: grupo.modelo, cor: grupo.cor, preco: grupo.preco, imagemUrl: grupo.imagemUrl, tamanho: grupo.grade[0].tamanho, quantidadeEmEstoque: grupo.grade[0].quantidadeEmEstoque })"
+              (click)="abrirModal(produto)"
               class="bg-white/90 backdrop-blur-sm dark:bg-neutral-800/90 text-gray-700 dark:text-gray-200 p-2.5 rounded-full shadow-lg hover:bg-white dark:hover:bg-neutral-700 transition-colors"
-              title="Editar Dados da Camisa">
+              title="Editar produto">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
@@ -56,8 +56,8 @@
           </div>
 
           <div class="aspect-[4/5] w-full bg-gray-50 dark:bg-neutral-950 overflow-hidden flex items-center justify-center relative border-b border-gray-100 dark:border-neutral-800">
-            @if (grupo.imagemUrl && grupo.imagemUrl !== 'assets/placeholder.png') {
-              <img [src]="grupo.imagemUrl" alt="{{ grupo.modelo }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+            @if (produto.imagemUrl) {
+              <img [src]="produto.imagemUrl" alt="{{ produto.modelo }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
             } @else {
               <svg class="w-12 h-12 text-gray-300 dark:text-neutral-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -65,37 +65,37 @@
             }
 
             <div class="absolute bottom-3 left-3 bg-black/80 backdrop-blur-md text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full tracking-wider shadow-md">
-              Total: {{ grupo.totalEstoque }} un
+              Total: {{ totalEstoque(produto) }} un
             </div>
           </div>
 
           <div class="p-5 flex flex-col flex-grow">
-            <p class="text-[10px] text-gray-400 font-mono tracking-widest mb-1">{{ grupo.sku }}</p>
-            <h2 class="text-base font-extrabold text-gray-900 dark:text-white truncate mb-1" title="{{ grupo.modelo }}">
-              {{ grupo.modelo }}
+            <p class="text-[10px] text-gray-400 font-mono tracking-widest mb-1">{{ obterSkuBase(produto) }}</p>
+            <h2 class="text-base font-extrabold text-gray-900 dark:text-white truncate mb-1" title="{{ produto.modelo }}">
+              {{ produto.modelo }}
             </h2>
             <div class="flex justify-between items-center mb-5">
-              <p class="text-sm font-medium text-gray-500 dark:text-neutral-400">{{ grupo.cor }}</p>
-              <p class="text-sm font-bold text-black dark:text-white">{{ grupo.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</p>
+              <p class="text-sm font-medium text-gray-500 dark:text-neutral-400">{{ produto.cor }}</p>
+              <p class="text-sm font-bold text-black dark:text-white">{{ produto.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</p>
             </div>
 
             <div class="mt-auto pt-4 border-t border-gray-50 dark:border-neutral-800">
               <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-2.5">Grade em Estoque</p>
               <div class="flex flex-wrap gap-2">
 
-                @for (item of grupo.grade; track item.id) {
+                @for (variacao of produto.variacoes; track variacao.id) {
                   <div class="flex items-center border border-gray-200 dark:border-neutral-700 rounded-lg overflow-hidden text-xs group/item relative transition-all">
                     <span class="bg-gray-100 dark:bg-neutral-800 text-black dark:text-white font-bold px-2 py-1.5 border-r border-gray-200 dark:border-neutral-700">
-                      {{ item.tamanho }}
+                      {{ variacao.tamanho }}
                     </span>
                     <span class="px-2 py-1.5 font-medium"
-                          [class.text-red-500]="item.quantidadeEmEstoque < 10"
-                          [class.text-gray-600]="item.quantidadeEmEstoque >= 10"
-                          [class.dark:text-gray-300]="item.quantidadeEmEstoque >= 10">
-                      {{ item.quantidadeEmEstoque }}
+                          [class.text-red-500]="variacao.quantidadeEmEstoque < 10"
+                          [class.text-gray-600]="variacao.quantidadeEmEstoque >= 10"
+                          [class.dark:text-gray-300]="variacao.quantidadeEmEstoque >= 10">
+                      {{ variacao.quantidadeEmEstoque }}
                     </span>
 
-                    <button (click)="excluirCamisa(item.id)" class="absolute inset-0 bg-red-500 text-white flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity cursor-pointer" title="Excluir este tamanho">
+                    <button (click)="excluirVariacao(variacao.id!)" class="absolute inset-0 bg-red-500 text-white flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity cursor-pointer" title="Excluir este tamanho">
                       <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                   </div>
@@ -123,14 +123,14 @@
 
         <div class="px-6 py-4 border-b border-gray-100 dark:border-neutral-800 flex justify-between items-center">
           <h3 class="text-lg font-bold text-black dark:text-white">
-            {{ camisaEditando() ? 'Editar Camisa' : 'Cadastrar Nova Camisa' }}
+            {{ produtoEditando() ? 'Editar Produto' : 'Cadastrar Novo Produto' }}
           </h3>
           <button (click)="fecharModal()" class="text-gray-400 hover:text-black dark:hover:text-white transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>
 
-        <form [formGroup]="formCamisa" (ngSubmit)="salvarCamisa()" class="p-6">
+        <form [formGroup]="formProduto" (ngSubmit)="salvarProduto()" class="p-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
 
             <div class="col-span-full">
@@ -144,7 +144,7 @@
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Modelo da Camisa</label>
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Modelo</label>
               <input type="text" formControlName="modelo" class="w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-black dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all">
             </div>
 
@@ -158,10 +158,17 @@
               <input type="number" step="0.01" formControlName="preco" class="w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-black dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all">
             </div>
 
-            <div class="col-span-full mt-2">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                {{ camisaEditando() ? 'Tamanho a ser editado' : 'Selecione a Grade de Tamanhos' }}
+            <div class="col-span-full">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Imagem do Produto</label>
+              <label class="flex items-center justify-between gap-3 w-full bg-gray-50 dark:bg-neutral-950 border border-dashed border-gray-300 dark:border-neutral-700 rounded-xl px-4 py-3 cursor-pointer hover:border-black dark:hover:border-white transition-colors">
+                <span class="truncate text-sm text-gray-500 dark:text-neutral-400">{{ nomeArquivoSelecionado() || (produtoEditando()?.imagemUrl ? 'Manter imagem atual' : 'Selecionar arquivo PNG ou JPG') }}</span>
+                <span class="px-3 py-1.5 rounded-lg bg-black text-white dark:bg-white dark:text-black text-[10px] font-bold uppercase tracking-wider">Arquivo</span>
+                <input type="file" accept="image/png,image/jpeg" (change)="onFileSelected($event)" class="hidden">
               </label>
+            </div>
+
+            <div class="col-span-full mt-2">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Selecione a Grade de Tamanhos</label>
               <div class="flex flex-wrap gap-2">
                 @for (tam of listaTamanhos; track tam) {
                   <button
@@ -198,19 +205,14 @@
               </div>
             }
 
-            <div class="col-span-full mt-2">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">URL da Imagem</label>
-              <input type="text" formControlName="imagemUrl" placeholder="Ex: link da internet ou diretório" class="w-full bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-black dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all">
-            </div>
-
           </div>
 
           <div class="flex gap-3 justify-end mt-4 pt-4 border-t border-gray-100 dark:border-neutral-800">
             <button type="button" (click)="fecharModal()" class="px-6 py-2.5 rounded-full font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors">
               Cancelar
             </button>
-            <button type="submit" [disabled]="formCamisa.invalid || tamanhosSelecionados().length === 0" class="px-6 py-2.5 rounded-full font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-              {{ camisaEditando() ? 'Atualizar' : 'Salvar Grade' }}
+            <button type="submit" [disabled]="formProduto.invalid || tamanhosSelecionados().length === 0" class="px-6 py-2.5 rounded-full font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+              {{ produtoEditando() ? 'Atualizar' : 'Salvar Produto' }}
             </button>
           </div>
         </form>

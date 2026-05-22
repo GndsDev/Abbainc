@@ -55,4 +55,17 @@ export class HistoricoComponent implements OnInit {
       }
     });
   }
+
+  enviarReciboPorEmail(pedido: Pedido) {
+    this.toastService.mostrar('Enviando recibo por e-mail...', 'info');
+
+    this.pedidoService.enviarReciboPorEmail(pedido.id!).subscribe({
+      next: () => {
+        this.toastService.mostrar('Recibo enviado com sucesso!', 'sucesso');
+      },
+      error: (erro) => {
+        this.toastService.mostrar('Erro ao enviar o recibo: ' + (erro.error || erro.message), 'erro');
+      }
+    });
+  }
 }

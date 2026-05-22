@@ -40,6 +40,17 @@
                 </svg>
                 Baixar Recibo
               </button>
+
+              <button
+                (click)="enviarReciboPorEmail(pedido)"
+                [disabled]="!pedido.cliente.email"
+                class="mt-2 flex w-full justify-center items-center gap-2 px-4 py-2.5 bg-black dark:bg-white hover:bg-neutral-800 dark:hover:bg-gray-200 text-white dark:text-black text-xs font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Enviar recibo por e-mail">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-18 8h18a2 2 0 002-2V8a2 2 0 00-2-2H3a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                </svg>
+                Enviar E-mail
+              </button>
             </div>
           </div>
 
@@ -51,7 +62,8 @@
                   <div class="flex items-center gap-3">
                     <span class="font-bold text-sm text-gray-400">{{ item.quantidade }}x</span>
                     <div>
-                      <p class="font-bold text-sm text-gray-900 dark:text-white">{{ item.camisa.modelo }}</p>
+                      <p class="font-bold text-sm text-gray-900 dark:text-white">{{ item.variacaoProduto.produto?.modelo }}</p>
+                      <p class="text-xs text-gray-500 dark:text-neutral-400">{{ item.variacaoProduto.produto?.cor }} • Tam: {{ item.variacaoProduto.tamanho }}</p>
                     </div>
                   </div>
                   <span class="font-bold text-sm text-black dark:text-white">{{ item.subtotal | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</span>

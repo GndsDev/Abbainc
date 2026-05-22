@@ -18,5 +18,7 @@ public class Cliente {
     @Column(nullable = false, unique = true)
     private String whatsapp;
 
+    private String email;
+
     private String endereco;
 }

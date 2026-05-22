@@ -25,6 +25,7 @@ export class ClientesComponent implements OnInit {
   formCliente: FormGroup = this.fb.group({
     nome: ['', Validators.required],
     whatsapp: ['', Validators.required],
+    email: ['', Validators.email],
     endereco: ['']
   });
 
@@ -58,6 +59,7 @@ export class ClientesComponent implements OnInit {
     this.formCliente.patchValue({
       nome: cliente.nome,
       whatsapp: cliente.whatsapp,
+      email: cliente.email,
       endereco: cliente.endereco
     });
 

@@ -1,20 +1,9 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
-import { CamisaService } from '../../services/camisa';
+import { ProdutoService } from '../../services/produto';
 import { ToastService } from '../../services/toast';
-import { Camisa } from '../../entities/camisa.entity';
-import { forkJoin } from 'rxjs';
-
-export interface CamisaAgrupada {
-  sku: string;
-  modelo: string;
-  cor: string;
-  preco: number;
-  imagemUrl?: string;
-  totalEstoque: number;
-  grade: { id: number; tamanho: string; quantidadeEmEstoque: number }[];
-}
+import { Produto } from '../../entities/produto.entity';
 
 @Component({
   selector: 'app-estoque',
@@ -23,77 +12,41 @@ export interface CamisaAgrupada {
   templateUrl: './estoque.html'
 })
 export class EstoqueComponent implements OnInit {
-  private camisaService = inject(CamisaService);
+  private produtoService = inject(ProdutoService);
   private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
 
-  camisas = signal<Camisa[]>([]);
+  produtos = signal<Produto[]>([]);
   carregando = signal(true);
   modalAberto = signal(false);
-
-  camisaEditando = signal<Camisa | null>(null);
+  produtoEditando = signal<Produto | null>(null);
+  arquivoSelecionado = signal<File | null>(null);
+  nomeArquivoSelecionado = signal('');
 
   listaTamanhos = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
   tamanhosSelecionados = signal<string[]>([]);
-
   quantidadesPorTamanho: { [key: string]: number } = {};
-
+  idsPorTamanho: { [key: string]: number } = {};
   termoPesquisa = signal('');
 
-  camisasFiltradas = computed(() => {
+  produtosFiltrados = computed(() => {
     const termo = this.termoPesquisa().toLowerCase();
-    const lista = this.camisas();
+    const lista = this.produtos();
 
     if (!termo) return lista;
 
-    return lista.filter(camisa =>
-      camisa.modelo.toLowerCase().includes(termo) ||
-      camisa.sku.toLowerCase().includes(termo) ||
-      camisa.cor.toLowerCase().includes(termo)
+    return lista.filter(produto =>
+      produto.modelo.toLowerCase().includes(termo) ||
+      produto.cor.toLowerCase().includes(termo) ||
+      produto.variacoes.some(variacao => variacao.sku.toLowerCase().includes(termo))
     );
   });
 
-  camisasAgrupadas = computed(() => {
-    const lista = this.camisasFiltradas();
-    const mapa = new Map<string, CamisaAgrupada>();
-
-    lista.forEach(camisa => {
-
-      const chave = `${camisa.modelo}-${camisa.cor}`.toLowerCase();
-
-      if (!mapa.has(chave)) {
-
-        const skuBase = camisa.sku.includes('-') ? camisa.sku.substring(0, camisa.sku.lastIndexOf('-')) : camisa.sku;
-
-        mapa.set(chave, {
-          sku: skuBase,
-          modelo: camisa.modelo,
-          cor: camisa.cor,
-          preco: camisa.preco,
-          imagemUrl: camisa.imagemUrl || 'assets/placeholder.png',
-          totalEstoque: 0,
-          grade: []
-        });
-      }
-
-      const grupo = mapa.get(chave)!;
-      grupo.grade.push({
-        id: camisa.id!,
-        tamanho: camisa.tamanho,
-        quantidadeEmEstoque: camisa.quantidadeEmEstoque
-      });
-      grupo.totalEstoque += camisa.quantidadeEmEstoque;
-    });
-
-    return Array.from(mapa.values());
-  });
-
-  formCamisa: FormGroup = this.fb.group({
+  formProduto: FormGroup = this.fb.group({
     sku: ['', Validators.required],
     modelo: ['', Validators.required],
     cor: ['', Validators.required],
-    preco: [0, [Validators.required, Validators.min(0.1)]],
-    imagemUrl: ['']
+    preco: [0, [Validators.required, Validators.min(0.1)]]
   });
 
   ngOnInit() {
@@ -102,9 +55,9 @@ export class EstoqueComponent implements OnInit {
 
   carregarEstoque() {
     this.carregando.set(true);
-    this.camisaService.listarEstoque().subscribe({
+    this.produtoService.listarProdutos().subscribe({
       next: (dados) => {
-        this.camisas.set(dados);
+        this.produtos.set(dados);
         this.carregando.set(false);
       },
       error: () => {
@@ -119,48 +72,73 @@ export class EstoqueComponent implements OnInit {
     if (atual.includes(tamanho)) {
       this.tamanhosSelecionados.set(atual.filter(t => t !== tamanho));
       delete this.quantidadesPorTamanho[tamanho];
+      delete this.idsPorTamanho[tamanho];
     } else {
       this.tamanhosSelecionados.set([...atual, tamanho]);
       this.quantidadesPorTamanho[tamanho] = 1;
     }
   }
 
-  abrirModal(camisa?: Camisa) {
-    if (camisa) {
-      this.camisaEditando.set(camisa);
+  abrirModal(produto?: Produto) {
+    if (produto) {
+      this.produtoEditando.set(produto);
+      const skuBase = this.obterSkuBase(produto);
 
-      let skuLimpo = camisa.sku;
-      if (skuLimpo.endsWith(`-${camisa.tamanho}`)) {
-        skuLimpo = skuLimpo.substring(0, skuLimpo.lastIndexOf('-'));
-      }
+      this.formProduto.patchValue({
+        sku: skuBase,
+        modelo: produto.modelo,
+        cor: produto.cor,
+        preco: produto.preco
+      });
 
-      this.formCamisa.patchValue({ ...camisa, sku: skuLimpo });
-      this.tamanhosSelecionados.set([camisa.tamanho]);
-      this.quantidadesPorTamanho = { [camisa.tamanho]: camisa.quantidadeEmEstoque };
+      this.tamanhosSelecionados.set(produto.variacoes.map(variacao => variacao.tamanho));
+      this.quantidadesPorTamanho = {};
+      this.idsPorTamanho = {};
+
+      produto.variacoes.forEach(variacao => {
+        this.quantidadesPorTamanho[variacao.tamanho] = variacao.quantidadeEmEstoque;
+        if (variacao.id) {
+          this.idsPorTamanho[variacao.tamanho] = variacao.id;
+        }
+      });
     } else {
-      this.camisaEditando.set(null);
-      this.formCamisa.reset({ preco: 0, imagemUrl: '' });
+      this.produtoEditando.set(null);
+      this.formProduto.reset({ preco: 0 });
       this.tamanhosSelecionados.set([]);
       this.quantidadesPorTamanho = {};
+      this.idsPorTamanho = {};
     }
+
+    this.arquivoSelecionado.set(null);
+    this.nomeArquivoSelecionado.set('');
     this.modalAberto.set(true);
   }
 
   fecharModal() {
     this.modalAberto.set(false);
-    this.camisaEditando.set(null);
+    this.produtoEditando.set(null);
+    this.arquivoSelecionado.set(null);
+    this.nomeArquivoSelecionado.set('');
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const arquivo = input.files?.[0] || null;
+
+    this.arquivoSelecionado.set(arquivo);
+    this.nomeArquivoSelecionado.set(arquivo?.name || '');
   }
 
   gerarSkuAutomatico() {
     const prefixo = 'ABB-';
     const numeroAleatorio = Math.floor(100000 + Math.random() * 900000);
     const skuGerado = `${prefixo}${numeroAleatorio}`;
-    this.formCamisa.patchValue({ sku: skuGerado });
+    this.formProduto.patchValue({ sku: skuGerado });
     this.toastService.mostrar('Código SKU gerado!', 'info');
   }
 
-  salvarCamisa() {
-    if (this.formCamisa.invalid) {
+  salvarProduto() {
+    if (this.formProduto.invalid) {
       this.toastService.mostrar('Preencha os dados base corretamente.', 'erro');
       return;
     }
@@ -171,59 +149,60 @@ export class EstoqueComponent implements OnInit {
       return;
     }
 
-    const dadosFormulario = this.formCamisa.value;
-    const camisaAtual = this.camisaEditando();
-
-    if (camisaAtual && camisaAtual.id) {
-      const tamanhoUnico = tamanhos[0];
-
-      let skuCorrigido = dadosFormulario.sku;
-      if (!skuCorrigido.endsWith(`-${tamanhoUnico}`)) {
-        skuCorrigido = `${skuCorrigido}-${tamanhoUnico}`;
-      }
-
-      const dadosAtualizados = {
-        ...dadosFormulario,
-        sku: skuCorrigido,
-        tamanho: tamanhoUnico,
-        quantidadeEmEstoque: this.quantidadesPorTamanho[tamanhoUnico] || 0
-      };
-
-      this.camisaService.atualizarCamisa(camisaAtual.id, dadosAtualizados).subscribe({
-        next: () => {
-          this.toastService.mostrar('Camisa atualizada com sucesso!', 'sucesso');
-          this.fecharModal();
-          this.carregarEstoque();
-        },
-        error: () => this.toastService.mostrar('Falha ao atualizar.', 'erro')
-      });
-    } else {
-      this.toastService.mostrar('Salvando grade de tamanhos...', 'info');
-
-      const requisicoes = tamanhos.map(tam => {
-        const novaCamisa = {
-          ...dadosFormulario,
-          sku: `${dadosFormulario.sku}-${tam}`,
-          tamanho: tam,
-          quantidadeEmEstoque: this.quantidadesPorTamanho[tam] || 0
-        };
-        return this.camisaService.cadastrarCamisa(novaCamisa);
-      });
-
-      forkJoin(requisicoes).subscribe({
-        next: () => {
-          this.toastService.mostrar(`Grade cadastrada com sucesso!`, 'sucesso');
-          this.fecharModal();
-          this.carregarEstoque();
-        },
-        error: () => this.toastService.mostrar('Falha ao cadastrar a grade.', 'erro')
-      });
+    if (!this.produtoEditando() && !this.arquivoSelecionado()) {
+      this.toastService.mostrar('Selecione uma imagem para o produto.', 'erro');
+      return;
     }
+
+    const dadosFormulario = this.formProduto.value;
+    const produtoDTO = {
+      modelo: dadosFormulario.modelo,
+      cor: dadosFormulario.cor,
+      preco: dadosFormulario.preco,
+      variacoes: tamanhos.map(tamanho => ({
+        id: this.idsPorTamanho[tamanho],
+        tamanho,
+        sku: this.criarSkuVariacao(dadosFormulario.sku, tamanho),
+        quantidadeEmEstoque: this.quantidadesPorTamanho[tamanho] || 0
+      }))
+    };
+
+    const formData = new FormData();
+    const arquivo = this.arquivoSelecionado();
+
+    if (arquivo) {
+      formData.append('imagem', arquivo);
+    }
+
+    formData.append('produto', new Blob([JSON.stringify(produtoDTO)], { type: 'application/json' }));
+
+    const produtoAtual = this.produtoEditando();
+
+    if (produtoAtual?.id) {
+      this.produtoService.atualizarProduto(produtoAtual.id, formData).subscribe({
+        next: () => {
+          this.toastService.mostrar('Produto atualizado com sucesso!', 'sucesso');
+          this.fecharModal();
+          this.carregarEstoque();
+        },
+        error: (erro) => this.toastService.mostrar('Falha ao atualizar: ' + (erro.error || erro.message), 'erro')
+      });
+      return;
+    }
+
+    this.produtoService.cadastrarProduto(formData).subscribe({
+      next: () => {
+        this.toastService.mostrar('Produto cadastrado com sucesso!', 'sucesso');
+        this.fecharModal();
+        this.carregarEstoque();
+      },
+      error: (erro) => this.toastService.mostrar('Falha ao cadastrar: ' + (erro.error || erro.message), 'erro')
+    });
   }
 
-  excluirCamisa(id: number) {
+  excluirVariacao(id: number) {
     if (confirm(`Tem certeza que deseja excluir este tamanho do estoque?`)) {
-      this.camisaService.excluirCamisa(id).subscribe({
+      this.produtoService.excluirVariacao(id).subscribe({
         next: () => {
           this.toastService.mostrar('Tamanho excluído com sucesso!', 'sucesso');
           this.carregarEstoque();
@@ -231,5 +210,24 @@ export class EstoqueComponent implements OnInit {
         error: () => this.toastService.mostrar('Erro ao excluir. Pode estar atrelado a uma venda.', 'erro')
       });
     }
+  }
+
+  totalEstoque(produto: Produto) {
+    return produto.variacoes.reduce((total, variacao) => total + variacao.quantidadeEmEstoque, 0);
+  }
+
+  obterSkuBase(produto: Produto) {
+    const primeiraVariacao = produto.variacoes[0];
+    if (!primeiraVariacao) return '';
+
+    const sufixo = `-${primeiraVariacao.tamanho}`;
+    return primeiraVariacao.sku.endsWith(sufixo)
+      ? primeiraVariacao.sku.substring(0, primeiraVariacao.sku.lastIndexOf('-'))
+      : primeiraVariacao.sku;
+  }
+
+  private criarSkuVariacao(skuBase: string, tamanho: string) {
+    const skuLimpo = String(skuBase || '').trim().toUpperCase();
+    return skuLimpo.endsWith(`-${tamanho}`) ? skuLimpo : `${skuLimpo}-${tamanho}`;
   }
 }
