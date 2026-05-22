@@ -1,13 +1,18 @@
 package com.abbainc.erp.Controller;
 
+import com.abbainc.erp.DTO.ClienteRequest;
 import com.abbainc.erp.Entity.Cliente;
 import com.abbainc.erp.Service.ClienteService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {
@@ -24,12 +29,12 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente cliente) {
+    public ResponseEntity<Cliente> cadastrarCliente(@Valid @RequestBody ClienteRequest cliente) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(cliente));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cliente> atualizar(@PathVariable Integer id, @RequestBody Cliente cliente) {
+    public ResponseEntity<Cliente> atualizar(@PathVariable @Positive(message = "ID do cliente deve ser positivo.") Integer id, @Valid @RequestBody ClienteRequest cliente) {
         Cliente clienteAtualizado = service.atualizar(id, cliente);
         return ResponseEntity.ok(clienteAtualizado);
     }

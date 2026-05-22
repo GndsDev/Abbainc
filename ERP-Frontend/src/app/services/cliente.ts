@@ -2,13 +2,14 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Cliente } from '../entities/cliente.entity';
+import { API_BASE_URL } from '../config/api';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClienteService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/clientes';
+  private apiUrl = `${API_BASE_URL}/clientes`;
 
   listarClientes(): Observable<Cliente[]> {
     return this.http.get<Cliente[]>(this.apiUrl);

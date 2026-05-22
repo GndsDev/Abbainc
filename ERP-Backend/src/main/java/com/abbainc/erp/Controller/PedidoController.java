@@ -1,16 +1,21 @@
 package com.abbainc.erp.Controller;
 
 
+import com.abbainc.erp.DTO.PedidoRequest;
 import com.abbainc.erp.Entity.Pedido;
 import com.abbainc.erp.Entity.StatusPedido;
 import com.abbainc.erp.Service.PedidoService;
 import com.abbainc.erp.Service.RelatorioService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
@@ -29,23 +34,18 @@ public class PedidoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> registrarPedido(@RequestBody Pedido pedido) {
-        try {
-            Pedido novoPedido = service.registrarVenda(pedido);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novoPedido);
-        } catch (RuntimeException e) {
-
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<Pedido> registrarPedido(@Valid @RequestBody PedidoRequest pedido) {
+        Pedido novoPedido = service.registrarVenda(pedido);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novoPedido);
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Pedido> atualizarStatus(@PathVariable Integer id, @RequestParam StatusPedido status) {
+    public ResponseEntity<Pedido> atualizarStatus(@PathVariable @Positive(message = "ID do pedido deve ser positivo.") Integer id, @RequestParam StatusPedido status) {
         return ResponseEntity.ok(service.atualizarStatus(id, status));
     }
 
     @GetMapping("/{id}/recibo")
-    public ResponseEntity<byte[]> baixarRecibo(@PathVariable Integer id) {
+    public ResponseEntity<byte[]> baixarRecibo(@PathVariable @Positive(message = "ID do pedido deve ser positivo.") Integer id) {
 
         Pedido pedido = service.buscarPorId(id);
 

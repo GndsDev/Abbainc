@@ -2,13 +2,14 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Camisa } from '../entities/camisa.entity';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../config/api';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CamisaService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/camisas';
+  private apiUrl = `${API_BASE_URL}/camisas`;
 
   listarEstoque(): Observable<Camisa[]> {
     return this.http.get<Camisa[]>(this.apiUrl);

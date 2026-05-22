@@ -1,6 +1,7 @@
 package com.abbainc.erp.Service;
 
 
+import com.abbainc.erp.DTO.PedidoRequest;
 import com.abbainc.erp.Entity.*;
 import com.abbainc.erp.Repository.CamisaRepository;
 import com.abbainc.erp.Repository.ClienteRepository;
@@ -28,26 +29,39 @@ public class PedidoService {
     }
 
     @Transactional
-    public Pedido registrarVenda(Pedido pedido) {
+    public Pedido registrarVenda(PedidoRequest request) {
 
-        Cliente cliente = clienteRepository.findById(pedido.getCliente().getId())
+        Cliente cliente = clienteRepository.findById(request.cliente().id())
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID informado."));
+
+        Pedido pedido = new Pedido();
         pedido.setCliente(cliente);
+        pedido.setFormaPagamento(request.formaPagamento());
+        pedido.setStatus(StatusPedido.PENDENTE);
 
-        for (ItemPedido item : pedido.getItens()) {
+        for (PedidoRequest.ItemRequest itemRequest : request.itens()) {
+            Integer quantidade = itemRequest.quantidade();
 
-            Camisa camisa = camisaRepository.findById(item.getCamisa().getId())
+            if (quantidade == null || quantidade <= 0) {
+                throw new IllegalArgumentException("Quantidade deve ser maior que zero.");
+            }
+
+            Camisa camisa = camisaRepository.findById(itemRequest.camisa().id())
                     .orElseThrow(() -> new RuntimeException("Camisa não encontrada."));
 
-            if (camisa.getQuantidadeEmEstoque() < item.getQuantidade()) {
+            if (camisa.getQuantidadeEmEstoque() < quantidade) {
                 throw new RuntimeException("Estoque insuficiente para a camisa: " + camisa.getModelo());
             }
 
-            camisa.setQuantidadeEmEstoque(camisa.getQuantidadeEmEstoque() - item.getQuantidade());
+            camisa.setQuantidadeEmEstoque(camisa.getQuantidadeEmEstoque() - quantidade);
             camisaRepository.save(camisa);
 
+            ItemPedido item = new ItemPedido();
+            item.setCamisa(camisa);
+            item.setQuantidade(quantidade);
             item.setPrecoUnitario(camisa.getPreco());
             item.setPedido(pedido);
+            pedido.getItens().add(item);
         }
 
         return pedidoRepository.save(pedido);
