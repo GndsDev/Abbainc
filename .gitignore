@@ -20,3 +20,9 @@ backend/*.war
 *.sln
 *.sw?
 .DS_Store 
+
+# Arquivos de configuração local e segredos
+.env
+.env.local
+.env.development
+application-local.properties
