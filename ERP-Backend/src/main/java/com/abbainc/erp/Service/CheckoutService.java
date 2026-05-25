@@ -50,17 +50,12 @@ public class CheckoutService {
                     novoCliente.setNome(request.getCliente().getNome());
                     novoCliente.setEmail(request.getCliente().getEmail());
                     novoCliente.setWhatsapp(request.getCliente().getTelefone());
-                    // Nota: O CPF vem no request para o Mercado Pago, mas como a sua entidade
-                    // Cliente não tem o campo CPF, nós não o salvamos no banco.
                     return clienteRepository.save(novoCliente);
                 });
 
-        // 2. PREPARAÇÃO DO PEDIDO (Data e Status são gerados pelo seu @PrePersist)
+        // 2. PREPARAÇÃO DO PEDIDO
         Pedido novoPedido = new Pedido();
         novoPedido.setCliente(cliente);
-
-        // ATENÇÃO: Ajuste a FormaPagamento abaixo para um valor real que exista no seu Enum!
-        // Exemplo: FormaPagamento.PIX, FormaPagamento.CARTAO, FormaPagamento.MERCADO_PAGO
         novoPedido.setFormaPagamento(FormaPagamento.MERCADO_PAGO);
 
         List<PreferenceItemRequest> itensMercadoPago = new ArrayList<>();
@@ -88,11 +83,13 @@ public class CheckoutService {
             itemLocal.setPrecoUnitario(variacao.getProduto().getPreco());
             itemLocal.setPedido(novoPedido); // Amarração bidirecional
 
-            // Adiciona o item na lista (O subtotal será calculado automaticamente depois)
             novoPedido.getItens().add(itemLocal);
         }
 
-        // 4. CHAMADA AO MERCADO PAGO
+        // 4. PASSO CRUCIAL: Salva o pedido ANTES para gerar o ID no banco de dados
+        novoPedido = pedidoRepository.save(novoPedido);
+
+        // 5. CHAMADA AO MERCADO PAGO (Agora incluindo o externalReference de forma segura)
         PreferencePayerRequest payer = PreferencePayerRequest.builder()
                 .email(request.getCliente().getEmail())
                 .name(request.getCliente().getNome())
@@ -110,13 +107,11 @@ public class CheckoutService {
                 .backUrls(backUrls)
                 .autoReturn("approved")
                 .statementDescriptor("ABBAINC")
+                .externalReference(novoPedido.getId().toString()) // <--- LIGAÇÃO FEITA AQUI!
                 .build();
 
         PreferenceClient client = new PreferenceClient();
         Preference preference = client.create(preferenceRequest);
-
-        // 5. SALVA O PEDIDO NO BANCO (O CascadeType.ALL salva os itens junto)
-        pedidoRepository.save(novoPedido);
 
         return preference.getInitPoint();
     }
