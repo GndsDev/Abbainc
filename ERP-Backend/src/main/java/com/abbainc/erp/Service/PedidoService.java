@@ -67,19 +67,26 @@ public class PedidoService {
             item.setPedido(pedido);
             pedido.getItens().add(item);
         }
-
-        Pedido pedidoSalvo = pedidoRepository.save(pedido);
-        enviarReciboAutomatico(pedidoSalvo);
-
-        return pedidoSalvo;
+        
+        return pedidoRepository.save(pedido);
     }
 
+    @Transactional
     public Pedido atualizarStatus(Integer id, StatusPedido novoStatus) {
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado."));
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
 
-        pedido.setStatus(novoStatus);
-        return pedidoRepository.save(pedido);
+        if (pedido.getStatus() != novoStatus) {
+            pedido.setStatus(novoStatus);
+            pedido = pedidoRepository.save(pedido);
+
+            if (novoStatus == StatusPedido.PAGO) {
+                enviarReciboAutomatico(pedido);
+                System.out.println("✅ Status atualizado para PAGO e recibo enviado com sucesso para o pedido " + id);
+            }
+        }
+
+        return pedido;
     }
     public Pedido buscarPorId(Integer id) {
         return pedidoRepository.findById(id)
