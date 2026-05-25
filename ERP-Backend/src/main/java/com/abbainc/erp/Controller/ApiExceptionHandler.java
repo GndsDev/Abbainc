@@ -41,9 +41,4 @@ public class ApiExceptionHandler {
     public ResponseEntity<String> handleDataIntegrity() {
         return ResponseEntity.badRequest().body("Registro duplicado ou dados incompatíveis com o banco.");
     }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntime(RuntimeException exception) {
-        return ResponseEntity.badRequest().body(exception.getMessage());
-    }
 }

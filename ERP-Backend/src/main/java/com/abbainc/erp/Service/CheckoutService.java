@@ -108,6 +108,7 @@ public class CheckoutService {
                 .autoReturn("approved")
                 .statementDescriptor("ABBAINC")
                 .externalReference(novoPedido.getId().toString()) // <--- LIGAÇÃO FEITA AQUI!
+                .notificationUrl("https://1273-138-0-245-247.ngrok-free.app/api/webhooks")
                 .build();
 
         PreferenceClient client = new PreferenceClient();
