@@ -82,7 +82,6 @@ public class PedidoService {
 
             if (novoStatus == StatusPedido.PAGO) {
                 enviarReciboAutomatico(pedido);
-                System.out.println("✅ Status atualizado para PAGO e recibo enviado com sucesso para o pedido " + id);
             }
         }
 

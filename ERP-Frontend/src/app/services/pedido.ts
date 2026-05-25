@@ -26,4 +26,8 @@ export class PedidoService {
   enviarReciboPorEmail(pedidoId: number) {
     return this.http.post<void>(`${this.apiUrl}/${pedidoId}/recibo/email`, {});
   }
+
+  atualizarStatus(pedidoId: number, status: string): Observable<Pedido> {
+    return this.http.patch<Pedido>(`${this.apiUrl}/${pedidoId}/status?status=${status}`, {});
+  }
 }

@@ -13,6 +13,7 @@ export interface Pedido {
   cliente: Cliente;
   formaPagamento: string;
   totalPedido: number;
+  status?: string;
   itens: {
     id: number;
     variacaoProduto: VariacaoProduto & { produto?: Produto };

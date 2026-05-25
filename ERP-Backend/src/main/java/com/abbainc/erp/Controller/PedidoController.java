@@ -40,7 +40,10 @@ public class PedidoController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Pedido> atualizarStatus(@PathVariable @Positive(message = "ID do pedido deve ser positivo.") Integer id, @RequestParam StatusPedido status) {
+    public ResponseEntity<Pedido> atualizarStatus(
+            @PathVariable @Positive(message = "ID do pedido deve ser positivo.") Integer id,
+            @RequestParam StatusPedido status) {
+        
         return ResponseEntity.ok(service.atualizarStatus(id, status));
     }
 

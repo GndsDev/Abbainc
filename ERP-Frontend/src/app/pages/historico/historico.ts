@@ -35,6 +35,22 @@ export class HistoricoComponent implements OnInit {
     });
   }
 
+  marcarComoPago(pedido: Pedido) {
+    if (confirm(`Confirmar o pagamento manual do pedido #${pedido.id}? O recibo será gerado e enviado ao cliente.`)) {
+      this.toastService.mostrar('Confirmando pagamento...', 'info');
+
+      this.pedidoService.atualizarStatus(pedido.id!, 'PAGO').subscribe({
+        next: () => {
+          this.toastService.mostrar('Pagamento confirmado e recibo enviado!', 'sucesso');
+          this.carregarHistorico();
+        },
+        error: () => {
+          this.toastService.mostrar('Erro ao confirmar o pagamento.', 'erro');
+        }
+      });
+    }
+  }
+
   imprimirRecibo(pedido: Pedido) {
     this.toastService.mostrar('Gerando recibo...', 'info');
 
