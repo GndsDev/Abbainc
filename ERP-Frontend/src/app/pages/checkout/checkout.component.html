@@ -1,0 +1,264 @@
+<div
+  class="checkout-page"
+  [style.--cursor-x]="cursor().x + 'px'"
+  [style.--cursor-y]="cursor().y + 'px'">
+  <div class="cursor-dot"></div>
+  <div class="cursor-ring"></div>
+
+  <div class="scene" aria-hidden="true">
+    <div class="scene-grid"></div>
+    <div class="scene-glow scene-glow-one"></div>
+    <div class="scene-glow scene-glow-two"></div>
+    <div class="particle-field">
+      @for (particula of particulas; track particula) {
+        <span [style.--i]="particula"></span>
+      }
+    </div>
+  </div>
+
+  <div class="freight-strip">Frete grátis para todo o Brasil durante a pré-venda</div>
+
+  <header class="site-header">
+    <a class="brand" href="#topo" aria-label="ABBAINC">
+      <img src="logo.png" alt="ABBAINC">
+      <span>ABBAINC</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Navegação">
+      <a href="#colecao">Coleção</a>
+      <a href="#checkout-form">Checkout</a>
+      <a href="#politica">Política</a>
+    </nav>
+
+    <a class="header-action" href="#checkout-form">Garantir camisa</a>
+  </header>
+
+  <main id="topo">
+    <section class="hero-section">
+      <div class="hero-copy">
+        <div class="badge">
+          <span></span>
+          Pré-venda aberta
+        </div>
+
+        <h1>
+          <span>ABBA</span>
+          <span>INC</span>
+        </h1>
+
+        <p>Não é uma marca. É um movimento. Escolha sua camisa, tamanho e quantidade antes do fechamento da coleção.</p>
+
+        <div class="hero-actions">
+          <a class="primary-action" href="#colecao">Ver coleção</a>
+          <a class="ghost-action" href="#checkout-form">Finalizar pedido</a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-frame">
+          @if (produtoDestaque(); as produto) {
+            <img [src]="imagemProduto(produto)" [alt]="produto.modelo">
+            <div class="hero-product-meta">
+              <span>{{ produto.modelo }}</span>
+              <strong>{{ produto.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
+            </div>
+          } @else {
+            <img src="produtos/Camisa-abbainc.jpeg" alt="Camisa ABBAINC">
+            <div class="hero-product-meta">
+              <span>Coleção 01</span>
+              <strong>Pré-venda</strong>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-strip" aria-label="Resumo da pré-venda">
+      <div>
+        <strong>{{ produtos().length || 0 }}</strong>
+        <span>Modelos</span>
+      </div>
+      <div>
+        <strong>P M G</strong>
+        <span>Tamanhos</span>
+      </div>
+      <div>
+        <strong>{{ total() | currency:'BRL':'symbol':'1.0-0':'pt-BR' }}</strong>
+        <span>Total</span>
+      </div>
+      <div>
+        <strong>15-20</strong>
+        <span>Dias úteis</span>
+      </div>
+    </section>
+
+    <section id="colecao" class="collection-section">
+      <div class="section-heading">
+        <div>
+          <span>Coleção 01</span>
+          <h2>Escolha modelo, tamanho e quantidade</h2>
+        </div>
+        <strong>{{ quantidadeItens() }} item(ns)</strong>
+      </div>
+
+      @if (carregandoProdutos()) {
+        <div class="loading-panel">
+          <span></span>
+          Carregando coleção...
+        </div>
+      } @else if (produtos().length === 0) {
+        <div class="loading-panel">Nenhum produto disponível no momento.</div>
+      } @else {
+        <div class="product-grid">
+          @for (produto of produtos(); track produto.id; let index = $index) {
+            <article
+              class="product-card"
+              [class.selected]="itemCarrinho(produto)"
+              [style.--delay]="(index * 90) + 'ms'">
+              <div class="product-image">
+                <img [src]="imagemProduto(produto)" [alt]="produto.modelo" loading="lazy">
+                <div class="product-overlay">
+                  <div>
+                    <h3>{{ produto.modelo }}</h3>
+                    <p>{{ produto.cor }}</p>
+                  </div>
+                  <strong>{{ produto.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
+                </div>
+                <div class="selected-mark">✓</div>
+              </div>
+
+              <div class="product-body">
+                <div class="product-title">
+                  <div>
+                    <h3>{{ produto.modelo }}</h3>
+                    <p>{{ produto.cor }}</p>
+                  </div>
+                  <strong>{{ produto.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
+                </div>
+
+                <div class="size-grid" aria-label="Tamanhos disponíveis">
+                  @for (variacao of produto.variacoes; track variacao.id) {
+                    <button
+                      type="button"
+                      (click)="selecionarTamanho(produto, variacao)"
+                      [disabled]="variacao.quantidadeEmEstoque <= 0"
+                      [class.active]="variacaoSelecionada(produto, variacao)">
+                      <span>{{ variacao.tamanho }}</span>
+                      @if (variacao.quantidadeEmEstoque <= 0) {
+                        <small>Esgotado</small>
+                      }
+                    </button>
+                  }
+                </div>
+
+                <div class="quantity-row">
+                  <span>Quantidade</span>
+                  <div class="quantity-control">
+                    <button type="button" (click)="alterarQuantidade(produto, -1)" [disabled]="!itemCarrinho(produto)">−</button>
+                    <strong>{{ itemCarrinho(produto)?.quantidade || 0 }}</strong>
+                    <button type="button" (click)="alterarQuantidade(produto, 1)" [disabled]="!itemCarrinho(produto) || (itemCarrinho(produto)?.quantidade || 0) >= estoqueSelecionado(produto)">+</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="order-band" aria-label="Total do pedido">
+      <div>
+        <span>Total do pedido</span>
+        <p>Frete grátis incluso</p>
+      </div>
+      <strong>{{ total() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong>
+    </section>
+
+    <section class="manifest-section">
+      <div class="manifest-word">ABBAINC</div>
+      <h2>Foi na intimidade<br>que Deus se mostrou leal.</h2>
+      <span></span>
+      <p>Comunidade de restauração e identidade</p>
+    </section>
+
+    <section class="checkout-section">
+      <div class="checkout-copy">
+        <span>Pré-venda exclusiva</span>
+        <h2>Garanta<br>sua<br>camisa</h2>
+        <p>Preencha seus dados e finalize o pagamento com segurança pelo Mercado Pago.</p>
+
+        <div class="cart-pills">
+          @if (itensCarrinho().length === 0) {
+            <span>Selecione uma camisa e tamanho</span>
+          } @else {
+            @for (item of itensCarrinho(); track item.variacaoProdutoId) {
+              <strong>{{ item.modelo }} {{ item.tamanho }} x{{ item.quantidade }}</strong>
+            }
+          }
+        </div>
+      </div>
+
+      <form id="checkout-form" [formGroup]="checkoutForm" (ngSubmit)="finalizarPedido()" class="checkout-form">
+        <label class="full">
+          <span>Nome completo</span>
+          <input type="text" formControlName="nome" autocomplete="name" placeholder="Seu nome completo">
+        </label>
+
+        <label>
+          <span>WhatsApp</span>
+          <input type="tel" formControlName="telefone" autocomplete="tel" placeholder="(00) 00000-0000" (input)="formatarTelefone()">
+        </label>
+
+        <label>
+          <span>Email</span>
+          <input type="email" formControlName="email" autocomplete="email" placeholder="seu@email.com">
+        </label>
+
+        <label class="full">
+          <span>CPF</span>
+          <input type="text" formControlName="cpf" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" (input)="formatarCpf()">
+        </label>
+
+        @if (erro()) {
+          <div class="form-error">{{ erro() }}</div>
+        }
+
+        <button type="submit" [disabled]="checkoutForm.invalid || itensCarrinho().length === 0 || enviandoPedido()">
+          @if (enviandoPedido()) {
+            Gerando pagamento...
+          } @else if (total() > 0) {
+            Finalizar pedido · {{ total() | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+          } @else {
+            Finalizar pedido
+          }
+        </button>
+
+        <p>Pagamento seguro via Mercado Pago · Frete grátis · Entrega 15 a 20 dias úteis</p>
+      </form>
+    </section>
+
+    <section id="politica" class="policy-section">
+      <article>
+        <h3>Pagamento</h3>
+        <p>Cartão, Pix e boleto bancário pelo Mercado Pago.</p>
+      </article>
+      <article>
+        <h3>Prazo</h3>
+        <p>Produção e envio em 15 a 20 dias úteis após confirmação do pagamento.</p>
+      </article>
+      <article>
+        <h3>Trocas</h3>
+        <p>Troca em até 7 dias corridos por defeito ou tamanho incorreto.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="brand">
+      <img src="logo.png" alt="ABBAINC">
+      <span>ABBAINC</span>
+    </div>
+    <p>Não se molde. Transforme-se.</p>
+    <span>@abbainc.co</span>
+  </footer>
+</div>

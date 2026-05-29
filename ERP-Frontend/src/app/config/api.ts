@@ -1,5 +1,3 @@
-const isLocal = window.location.hostname === 'localhost';
+import { environment } from '../../environments/environment';
 
-export const API_BASE_URL = isLocal
-  ? 'http://localhost:8080/api'
-  : 'https://abbainc-backend.onrender.com/api';
+export const API_BASE_URL = environment.apiUrl;

@@ -55,8 +55,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Liberta todas as origens (ex: o seu Live Server e o site do Netlify)
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "https://abbainc.online",
+                "http://localhost:4200",
+                "https://abbainc.vercel.app"
+        ));
 
         // Liberta os métodos necessários
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
