@@ -38,4 +38,10 @@ public class ClienteController {
         Cliente clienteAtualizado = service.atualizar(id, cliente);
         return ResponseEntity.ok(clienteAtualizado);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable @Positive(message = "ID do cliente deve ser positivo.") Integer id) {
+        service.excluir(id);
+        return ResponseEntity.noContent().build();
+    }
 }

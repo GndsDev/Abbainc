@@ -1,6 +1,4 @@
-@if (rotaPublica()) {
-  <router-outlet></router-outlet>
-} @else if (!authService.autenticado()) {
+@if (!authService.autenticado()) {
   <div class="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 transition-colors duration-300 font-sans flex items-center justify-center p-4">
     <form (ngSubmit)="login()" class="w-full max-w-sm bg-white dark:bg-neutral-950 border border-gray-100 dark:border-neutral-800 shadow-xl rounded-2xl p-6 space-y-5">
       <div class="flex items-center gap-3">

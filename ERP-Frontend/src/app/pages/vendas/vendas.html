@@ -110,4 +110,70 @@
       </div>
     </div>
   </div>
+
+  <div class="mt-10 bg-white dark:bg-neutral-900 rounded-[1.5rem] shadow-sm border border-gray-100 dark:border-neutral-800 overflow-hidden">
+    <div class="px-5 py-4 border-b border-gray-100 dark:border-neutral-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div>
+        <h2 class="text-base font-bold text-black dark:text-white">Pedidos</h2>
+        <p class="text-xs text-gray-500 dark:text-neutral-400">Atualize status ou exclua registros sem sair do ponto de venda.</p>
+      </div>
+    </div>
+
+    @if (carregandoPedidos()) {
+      <div class="py-12 flex justify-center">
+        <div class="w-7 h-7 border-4 border-gray-200 border-t-black dark:border-neutral-800 dark:border-t-white rounded-full animate-spin"></div>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-100 dark:divide-neutral-800">
+          <thead class="bg-gray-50 dark:bg-neutral-950">
+            <tr>
+              <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-500">Pedido</th>
+              <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-500">Cliente</th>
+              <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-500">Total</th>
+              <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-gray-500">Status</th>
+              <th class="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-gray-500">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
+            @for (pedido of pedidos(); track pedido.id) {
+              <tr>
+                <td class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">#{{ pedido.id }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700 dark:text-neutral-300">{{ pedido.cliente.nome }}</td>
+                <td class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">{{ pedido.totalPedido | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+                <td class="px-4 py-3">
+                  <select
+                    [ngModel]="pedido.status || 'PENDENTE'"
+                    (ngModelChange)="atualizarStatusPedido(pedido, $event)"
+                    class="bg-gray-50 dark:bg-neutral-950 border border-gray-200 dark:border-neutral-800 rounded-xl px-3 py-2 text-xs font-bold text-black dark:text-white outline-none">
+                    @for (status of statusPedidos; track status) {
+                      <option [value]="status">
+                        @if (status === 'CANCELADO') {
+                          Cancelado
+                        } @else {
+                          {{ status }}
+                        }
+                      </option>
+                    }
+                  </select>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <button
+                    type="button"
+                    (click)="excluirPedido(pedido)"
+                    class="inline-flex items-center justify-center px-3 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 text-xs font-bold transition-colors">
+                    Excluir
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-neutral-400">Nenhum pedido registrado.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
 </div>

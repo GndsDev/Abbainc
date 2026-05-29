@@ -1,10 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterModule, RouterOutlet } from '@angular/router';
+import { RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastComponent } from './components/toast/toast';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from './services/auth';
-import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -14,10 +13,8 @@ import { filter } from 'rxjs';
 })
 export class AppComponent {
   authService = inject(AuthService);
-  private router = inject(Router);
   menuAberto = signal(false);
   modoEscuro = signal(false);
-  rotaPublica = signal(false);
   usuarioLogin = signal('');
   senhaLogin = signal('');
   erroLogin = signal('');
@@ -27,10 +24,6 @@ export class AppComponent {
     const temaSalvo = localStorage.getItem('tema');
     this.modoEscuro.set(temaSalvo === 'dark');
     this.aplicarTema();
-    this.atualizarRotaPublica(this.router.url);
-    this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe(event => this.atualizarRotaPublica(event.urlAfterRedirects));
   }
 
   toggleMenu() {
@@ -50,11 +43,6 @@ export class AppComponent {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('tema', 'light');
     }
-  }
-
-  private atualizarRotaPublica(url: string) {
-    const rota = url.split('?')[0].split('#')[0];
-    this.rotaPublica.set(rota === '/' || rota === '/checkout');
   }
 
   login() {

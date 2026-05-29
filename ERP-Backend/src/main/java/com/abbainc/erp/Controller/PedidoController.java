@@ -47,6 +47,12 @@ public class PedidoController {
         return ResponseEntity.ok(service.atualizarStatus(id, status));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable @Positive(message = "ID do pedido deve ser positivo.") Integer id) {
+        service.excluir(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}/recibo")
     public ResponseEntity<byte[]> baixarRecibo(@PathVariable @Positive(message = "ID do pedido deve ser positivo.") Integer id) {
 

@@ -26,4 +26,8 @@ export class ProdutoService {
   excluirVariacao(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/variacoes/${id}`);
   }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

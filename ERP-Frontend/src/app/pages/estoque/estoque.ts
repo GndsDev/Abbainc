@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } 
 import { ProdutoService } from '../../services/produto';
 import { ToastService } from '../../services/toast';
 import { Produto } from '../../entities/produto.entity';
+import { EMPTY, catchError } from 'rxjs';
 
 @Component({
   selector: 'app-estoque',
@@ -210,6 +211,22 @@ export class EstoqueComponent implements OnInit {
         error: () => this.toastService.mostrar('Erro ao excluir. Pode estar atrelado a uma venda.', 'erro')
       });
     }
+  }
+
+  excluirProduto(produto: Produto) {
+    if (!confirm(`Tem certeza que deseja excluir o produto ${produto.modelo}?`)) {
+      return;
+    }
+
+    this.produtoService.delete(produto.id!).pipe(
+      catchError(erro => {
+        this.toastService.mostrar(erro.error || erro.message || 'Erro ao excluir produto.', 'erro');
+        return EMPTY;
+      })
+    ).subscribe(() => {
+      this.toastService.mostrar('Produto excluído com sucesso!', 'sucesso');
+      this.carregarEstoque();
+    });
   }
 
   totalEstoque(produto: Produto) {

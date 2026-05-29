@@ -39,6 +39,6 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrity() {
-        return ResponseEntity.badRequest().body("Registro duplicado ou dados incompatíveis com o banco.");
+        return ResponseEntity.badRequest().body("Não é possível excluir este registro pois ele possui histórico vinculado no sistema.");
     }
 }

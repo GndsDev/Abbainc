@@ -77,6 +77,14 @@ public class PedidoService {
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
 
         if (pedido.getStatus() != novoStatus) {
+            if (novoStatus == StatusPedido.CANCELADO && pedido.getStatus() != StatusPedido.CANCELADO) {
+                pedido.getItens().forEach(item -> {
+                    VariacaoProduto variacao = item.getVariacaoProduto();
+                    variacao.setQuantidadeEmEstoque(variacao.getQuantidadeEmEstoque() + item.getQuantidade());
+                    variacaoProdutoRepository.save(variacao);
+                });
+            }
+
             pedido.setStatus(novoStatus);
             pedido = pedidoRepository.save(pedido);
 
@@ -87,9 +95,16 @@ public class PedidoService {
 
         return pedido;
     }
+
     public Pedido buscarPorId(Integer id) {
         return pedidoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
+    }
+
+    @Transactional
+    public void excluir(Integer id) {
+        Pedido pedido = buscarPorId(id);
+        pedidoRepository.delete(pedido);
     }
 
     public void enviarReciboPorEmail(Integer id) {

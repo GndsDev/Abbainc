@@ -54,6 +54,12 @@ public class ProdutoService {
     }
 
     @Transactional
+    public void excluir(Integer id) {
+        Produto produto = buscarPorId(id);
+        produtoRepository.delete(produto);
+    }
+
+    @Transactional
     public void deletarVariacao(Integer id) {
         VariacaoProduto variacao = variacaoProdutoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Variação do produto não encontrada."));

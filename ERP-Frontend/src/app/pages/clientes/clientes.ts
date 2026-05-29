@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ClienteService } from '../../services/cliente';
 import { ToastService } from '../../services/toast';
 import { Cliente } from '../../entities/cliente.entity';
+import { EMPTY, catchError } from 'rxjs';
 
 @Component({
   selector: 'app-clientes',
@@ -103,5 +104,21 @@ export class ClientesComponent implements OnInit {
         }
       });
     }
+  }
+
+  excluirCliente(cliente: Cliente) {
+    if (!confirm(`Deseja excluir o cliente ${cliente.nome}?`)) {
+      return;
+    }
+
+    this.clienteService.delete(cliente.id!).pipe(
+      catchError(erro => {
+        this.toastService.mostrar(erro.error || erro.message || 'Erro ao excluir cliente.', 'erro');
+        return EMPTY;
+      })
+    ).subscribe(() => {
+      this.toastService.mostrar('Cliente excluído com sucesso!', 'sucesso');
+      this.carregarClientes();
+    });
   }
 }

@@ -60,6 +60,12 @@ public class ProdutoController {
         return ResponseEntity.ok(service.atualizar(id, request, imagem));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable @Positive(message = "ID do produto deve ser positivo.") Integer id) {
+        service.excluir(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/variacoes/{id}")
     public ResponseEntity<Void> deletarVariacao(@PathVariable @Positive(message = "ID da variação deve ser positivo.") Integer id) {
         service.deletarVariacao(id);

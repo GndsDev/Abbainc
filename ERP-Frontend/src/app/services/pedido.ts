@@ -30,4 +30,8 @@ export class PedidoService {
   atualizarStatus(pedidoId: number, status: string): Observable<Pedido> {
     return this.http.patch<Pedido>(`${this.apiUrl}/${pedidoId}/status?status=${status}`, {});
   }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

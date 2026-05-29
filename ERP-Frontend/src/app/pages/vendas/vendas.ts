@@ -7,7 +7,8 @@ import { CommonModule } from '@angular/common';
 import { ProdutoService } from '../../services/produto';
 import { PedidoService } from '../../services/pedido';
 import { ItemEstoque, Produto } from '../../entities/produto.entity';
-import { PedidoDTO } from '../../entities/pedido.entity';
+import { Pedido, PedidoDTO } from '../../entities/pedido.entity';
+import { EMPTY, catchError } from 'rxjs';
 
 interface ItemCarrinho {
   item: ItemEstoque;
@@ -29,6 +30,9 @@ export class VendasComponent implements OnInit {
   clientes = signal<Cliente[]>([]);
   estoqueDisponivel = signal<ItemEstoque[]>([]);
   carrinho = signal<ItemCarrinho[]>([]);
+  pedidos = signal<Pedido[]>([]);
+  carregandoPedidos = signal(true);
+  statusPedidos = ['PENDENTE', 'PAGO', 'ENVIADO', 'ENTREGUE', 'CANCELADO'];
 
   clienteSelecionado = signal<number>(1);
   formaPagamentoSelecionada = signal<string>('PIX');
@@ -41,6 +45,7 @@ export class VendasComponent implements OnInit {
   ngOnInit() {
     this.carregarEstoque();
     this.carregarClientes();
+    this.carregarPedidos();
   }
 
   carregarClientes() {
@@ -52,6 +57,20 @@ export class VendasComponent implements OnInit {
   carregarEstoque() {
     this.produtoService.listarProdutos().subscribe(dados => {
       this.estoqueDisponivel.set(this.criarItensEstoque(dados).filter(item => item.quantidadeEmEstoque > 0));
+    });
+  }
+
+  carregarPedidos() {
+    this.carregandoPedidos.set(true);
+    this.pedidoService.listarHistorico().subscribe({
+      next: pedidos => {
+        this.pedidos.set([...pedidos].reverse());
+        this.carregandoPedidos.set(false);
+      },
+      error: erro => {
+        this.toastService.mostrar('Erro ao carregar pedidos: ' + (erro.error || erro.message), 'erro');
+        this.carregandoPedidos.set(false);
+      }
     });
   }
 
@@ -115,10 +134,44 @@ export class VendasComponent implements OnInit {
         this.toastService.mostrar('Venda finalizada com sucesso! O estoque foi baixado.');
         this.carrinho.set([]);
         this.carregarEstoque();
+        this.carregarPedidos();
       },
       error: (erro) => {
         this.toastService.mostrar('Falha ao processar a venda: ' + (erro.error || erro.message));
       }
+    });
+  }
+
+  atualizarStatusPedido(pedido: Pedido, status: string) {
+    const statusNormalizado = status === 'CANCELADO' ? 'CANCELADO' : status;
+
+    this.pedidoService.atualizarStatus(pedido.id!, statusNormalizado).pipe(
+      catchError(erro => {
+        this.toastService.mostrar(erro.error || erro.message || 'Erro ao atualizar status do pedido.', 'erro');
+        return EMPTY;
+      })
+    ).subscribe(() => {
+      this.toastService.mostrar('Status atualizado com sucesso!', 'sucesso');
+      this.carregarPedidos();
+      if (statusNormalizado === 'CANCELADO') {
+        this.carregarEstoque();
+      }
+    });
+  }
+
+  excluirPedido(pedido: Pedido) {
+    if (!confirm(`Deseja excluir o pedido #${pedido.id}?`)) {
+      return;
+    }
+
+    this.pedidoService.delete(pedido.id!).pipe(
+      catchError(erro => {
+        this.toastService.mostrar(erro.error || erro.message || 'Erro ao excluir pedido.', 'erro');
+        return EMPTY;
+      })
+    ).subscribe(() => {
+      this.toastService.mostrar('Pedido excluído com sucesso!', 'sucesso');
+      this.carregarPedidos();
     });
   }
 

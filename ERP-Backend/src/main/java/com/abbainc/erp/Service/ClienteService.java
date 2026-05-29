@@ -36,6 +36,13 @@ public class ClienteService {
         return repository.save(clienteExistente);
     }
 
+    public void excluir(Integer id) {
+        Cliente cliente = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: " + id));
+
+        repository.delete(cliente);
+    }
+
     private void preencherCliente(Cliente cliente, ClienteRequest request) {
         cliente.setNome(normalizar(request.nome()));
         cliente.setWhatsapp(normalizar(request.whatsapp()));
