@@ -58,7 +58,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://abbainc.online",
                 "http://localhost:4200",
-                "https://abbainc.vercel.app"
+                "https://abbainc.vercel.app",
+                "https://astounding-granita-ddc946.netlify.app"
         ));
 
         // Liberta os métodos necessários
