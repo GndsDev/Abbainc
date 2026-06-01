@@ -93,14 +93,19 @@
               <div class="flex flex-wrap gap-2">
 
                 @for (variacao of produto.variacoes; track variacao.id) {
-                  <div class="flex items-center border border-gray-200 dark:border-neutral-700 rounded-lg overflow-hidden text-xs group/item relative transition-all">
+                  <div
+                    class="flex items-center border rounded-lg overflow-hidden text-xs group/item relative transition-all"
+                    [ngClass]="variacao.quantidadeEmEstoque < 5
+                      ? 'bg-red-100 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                      : 'bg-white border-gray-200 dark:bg-transparent dark:border-neutral-700'">
                     <span class="bg-gray-100 dark:bg-neutral-800 text-black dark:text-white font-bold px-2 py-1.5 border-r border-gray-200 dark:border-neutral-700">
                       {{ variacao.tamanho }}
                     </span>
                     <span class="px-2 py-1.5 font-medium"
-                          [class.text-red-500]="variacao.quantidadeEmEstoque < 10"
-                          [class.text-gray-600]="variacao.quantidadeEmEstoque >= 10"
-                          [class.dark:text-gray-300]="variacao.quantidadeEmEstoque >= 10">
+                          [class.text-red-600]="variacao.quantidadeEmEstoque < 5"
+                          [class.dark:text-red-300]="variacao.quantidadeEmEstoque < 5"
+                          [class.text-gray-600]="variacao.quantidadeEmEstoque >= 5"
+                          [class.dark:text-gray-300]="variacao.quantidadeEmEstoque >= 5">
                       {{ variacao.quantidadeEmEstoque }}
                     </span>
 

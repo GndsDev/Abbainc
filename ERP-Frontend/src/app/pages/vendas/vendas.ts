@@ -32,7 +32,8 @@ export class VendasComponent implements OnInit {
   carrinho = signal<ItemCarrinho[]>([]);
   pedidos = signal<Pedido[]>([]);
   carregandoPedidos = signal(true);
-  statusPedidos = ['PENDENTE', 'PAGO', 'ENVIADO', 'ENTREGUE', 'CANCELADO'];
+  termoBuscaPedidos = signal('');
+  statusPedidos = ['PENDENTE', 'PAGO', 'ENVIADO', 'ENTREGUE', 'CANCELADO', 'DEVOLVIDO'];
 
   clienteSelecionado = signal<number>(1);
   formaPagamentoSelecionada = signal<string>('PIX');
@@ -40,6 +41,21 @@ export class VendasComponent implements OnInit {
   totalCarrinho = computed(() => {
     return this.carrinho().reduce((acc, item) => acc + item.subtotal, 0);
   });
+
+  pedidosFiltrados = computed(() => {
+    const termo = this.termoBuscaPedidos().trim().toLowerCase();
+
+    if (!termo) {
+      return this.pedidos();
+    }
+
+    return this.pedidos().filter(pedido =>
+      pedido.cliente.nome.toLowerCase().includes(termo) ||
+      pedido.cliente.whatsapp?.toLowerCase().includes(termo) ||
+      pedido.cliente.email?.toLowerCase().includes(termo)
+    );
+  });
+
   toastService: ToastService = inject(ToastService);
 
   ngOnInit() {
@@ -153,7 +169,7 @@ export class VendasComponent implements OnInit {
     ).subscribe(() => {
       this.toastService.mostrar('Status atualizado com sucesso!', 'sucesso');
       this.carregarPedidos();
-      if (statusNormalizado === 'CANCELADO') {
+    if (statusNormalizado === 'CANCELADO' || statusNormalizado === 'DEVOLVIDO') {
         this.carregarEstoque();
       }
     });

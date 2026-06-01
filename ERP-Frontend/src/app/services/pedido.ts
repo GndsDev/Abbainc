@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PedidoDTO, Pedido } from '../entities/pedido.entity';
 import { API_BASE_URL } from '../config/api';
@@ -15,8 +15,12 @@ export class PedidoService {
     return this.http.post(this.apiUrl, pedido);
   }
 
-  listarHistorico(): Observable<Pedido[]> {
-    return this.http.get<Pedido[]>(this.apiUrl);
+  listarHistorico(busca?: string): Observable<Pedido[]> {
+    const params = busca?.trim()
+      ? new HttpParams().set('busca', busca.trim())
+      : undefined;
+
+    return this.http.get<Pedido[]>(this.apiUrl, { params });
   }
 
   baixarReciboPdf(pedidoId: number) {

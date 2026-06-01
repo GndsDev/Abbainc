@@ -7,7 +7,8 @@ public enum StatusPedido {
     PAGO,
     ENVIADO,
     ENTREGUE,
-    CANCELADO;
+    CANCELADO,
+    DEVOLVIDO;
 
     @JsonCreator
     public static StatusPedido fromString(String value) {

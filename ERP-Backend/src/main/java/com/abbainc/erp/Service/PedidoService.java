@@ -32,6 +32,14 @@ public class PedidoService {
         return pedidoRepository.findAll();
     }
 
+    public List<Pedido> listarTodos(String busca) {
+        if (busca == null || busca.isBlank()) {
+            return listarTodos();
+        }
+
+        return pedidoRepository.buscarPorCliente(busca.trim());
+    }
+
     @Transactional
     public Pedido registrarVenda(PedidoRequest request) {
 
@@ -77,7 +85,7 @@ public class PedidoService {
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado com o ID: " + id));
 
         if (pedido.getStatus() != novoStatus) {
-            if (novoStatus == StatusPedido.CANCELADO && pedido.getStatus() != StatusPedido.CANCELADO) {
+            if (deveRestaurarEstoque(pedido.getStatus(), novoStatus)) {
                 pedido.getItens().forEach(item -> {
                     VariacaoProduto variacao = item.getVariacaoProduto();
                     variacao.setQuantidadeEmEstoque(variacao.getQuantidadeEmEstoque() + item.getQuantidade());
@@ -128,5 +136,13 @@ public class PedidoService {
     private void enviarRecibo(Pedido pedido) {
         byte[] pdfBytes = relatorioService.gerarReciboPdf(pedido);
         emailService.enviarReciboComAnexo(pedido.getCliente().getEmail(), pdfBytes);
+    }
+
+    private boolean deveRestaurarEstoque(StatusPedido statusAtual, StatusPedido novoStatus) {
+        return statusRestauraEstoque(novoStatus) && !statusRestauraEstoque(statusAtual);
+    }
+
+    private boolean statusRestauraEstoque(StatusPedido status) {
+        return status == StatusPedido.CANCELADO || status == StatusPedido.DEVOLVIDO;
     }
 }

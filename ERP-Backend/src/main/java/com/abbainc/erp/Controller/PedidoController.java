@@ -29,8 +29,8 @@ public class PedidoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Pedido>> listarPedidos() {
-        return ResponseEntity.ok(service.listarTodos());
+    public ResponseEntity<List<Pedido>> listarPedidos(@RequestParam(required = false) String busca) {
+        return ResponseEntity.ok(service.listarTodos(busca));
     }
 
     @PostMapping

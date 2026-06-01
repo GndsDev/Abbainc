@@ -1,0 +1,103 @@
+<div class="p-4 md:p-6 max-w-7xl mx-auto animate-fade-in">
+  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight text-black dark:text-white">Dashboard</h1>
+      <p class="text-sm text-gray-500 dark:text-neutral-400">Resumo financeiro e alertas críticos do mês atual.</p>
+    </div>
+
+    <button
+      type="button"
+      (click)="carregarResumo()"
+      class="inline-flex items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-neutral-800 active:scale-95 dark:bg-white dark:text-black dark:hover:bg-gray-200">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M4 4v6h6M20 20v-6h-6M20 8A8 8 0 006.2 3.2L4 6m0 10a8 8 0 0013.8 4.8L20 18" />
+      </svg>
+      Atualizar
+    </button>
+  </div>
+
+  @if (carregando()) {
+    <div class="flex flex-col items-center justify-center gap-4 py-20">
+      <div class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-black dark:border-neutral-800 dark:border-t-white"></div>
+      <p class="text-sm font-medium text-gray-500 dark:text-neutral-400">Carregando indicadores...</p>
+    </div>
+  } @else {
+    @if (erro()) {
+      <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+        {{ erro() }}
+      </div>
+    }
+
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+      <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Faturamento do mês</p>
+            <strong class="mt-3 block text-3xl font-black tracking-tight text-black dark:text-white">
+              {{ resumo().faturamentoMesAtual | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+            </strong>
+          </div>
+          <div class="grid h-12 w-12 place-items-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 12v-2m9-4a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Pedidos pendentes</p>
+            <strong class="mt-3 block text-3xl font-black tracking-tight text-black dark:text-white">
+              {{ resumo().pedidosPendentes }}
+            </strong>
+          </div>
+          <div class="grid h-12 w-12 place-items-center rounded-full bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="mt-8 overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm dark:border-red-900/50 dark:bg-neutral-900">
+      <div class="border-b border-red-100 bg-red-50 px-5 py-4 dark:border-red-900/50 dark:bg-red-950/25">
+        <h2 class="text-base font-bold text-red-700 dark:text-red-300">Estoque crítico</h2>
+        <p class="text-xs text-red-500 dark:text-red-400">Produtos com menos de 5 unidades disponíveis.</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-red-100 dark:divide-red-900/50">
+          <thead class="bg-red-50/70 dark:bg-red-950/20">
+            <tr>
+              <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-red-500">Produto</th>
+              <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-red-500">Cor</th>
+              <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-red-500">Tamanho</th>
+              <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-red-500">SKU</th>
+              <th class="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-red-500">Estoque</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-red-100 dark:divide-red-900/40">
+            @for (produto of resumo().produtosEstoqueCritico; track produto.variacaoId) {
+              <tr class="bg-red-50/45 dark:bg-red-950/10">
+                <td class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">{{ produto.modelo }}</td>
+                <td class="px-4 py-3 text-sm text-gray-700 dark:text-neutral-300">{{ produto.cor }}</td>
+                <td class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">{{ produto.tamanho }}</td>
+                <td class="px-4 py-3 text-sm font-mono text-gray-600 dark:text-neutral-400">{{ produto.sku }}</td>
+                <td class="px-4 py-3 text-right text-sm font-black text-red-600 dark:text-red-300">{{ produto.quantidadeEmEstoque }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-neutral-400">
+                  Nenhum produto em estoque crítico.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>
