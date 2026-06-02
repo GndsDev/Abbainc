@@ -1,8 +1,11 @@
 package com.abbainc.erp.Service;
 
-
 import com.abbainc.erp.DTO.PedidoRequest;
-import com.abbainc.erp.Entity.*;
+import com.abbainc.erp.Entity.Cliente;
+import com.abbainc.erp.Entity.ItemPedido;
+import com.abbainc.erp.Entity.Pedido;
+import com.abbainc.erp.Entity.StatusPedido;
+import com.abbainc.erp.Entity.VariacaoProduto;
 import com.abbainc.erp.Repository.ClienteRepository;
 import com.abbainc.erp.Repository.PedidoRepository;
 import com.abbainc.erp.Repository.VariacaoProdutoRepository;
@@ -75,7 +78,7 @@ public class PedidoService {
             item.setPedido(pedido);
             pedido.getItens().add(item);
         }
-        
+
         return pedidoRepository.save(pedido);
     }
 

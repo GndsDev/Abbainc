@@ -2,7 +2,10 @@ package com.abbainc.erp.Controller;
 
 import com.abbainc.erp.Service.MercadoPagoWebhookService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/webhooks")
@@ -23,10 +26,9 @@ public class WebhookController {
         Long idPagamento = (dataId != null) ? dataId : id;
 
         if (idPagamento != null && ("payment".equals(topic) || topic == null)) {
-
             new Thread(() -> webhookService.processarPagamento(idPagamento)).start();
         }
-        
+
         return ResponseEntity.ok("Notificação recebida com sucesso");
     }
 }

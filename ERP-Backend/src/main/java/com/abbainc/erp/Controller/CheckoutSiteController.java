@@ -3,7 +3,10 @@ package com.abbainc.erp.Controller;
 import com.abbainc.erp.DTO.PedidoSiteRequestDTO;
 import com.abbainc.erp.Service.CheckoutService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
@@ -21,9 +24,7 @@ public class CheckoutSiteController {
     public ResponseEntity<?> processarCompraDoSite(@RequestBody PedidoSiteRequestDTO request) {
         try {
             String linkPagamento = checkoutService.gerarLinkPagamento(request);
-
             return ResponseEntity.ok(Map.of("init_point", linkPagamento));
-
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
         }

@@ -2,17 +2,25 @@ package com.abbainc.erp.Service;
 
 import com.abbainc.erp.DTO.ItemPedidoSiteDTO;
 import com.abbainc.erp.DTO.PedidoSiteRequestDTO;
-import com.abbainc.erp.Entity.*;
+import com.abbainc.erp.Entity.Cliente;
+import com.abbainc.erp.Entity.FormaPagamento;
+import com.abbainc.erp.Entity.ItemPedido;
+import com.abbainc.erp.Entity.Pedido;
+import com.abbainc.erp.Entity.VariacaoProduto;
 import com.abbainc.erp.Repository.ClienteRepository;
 import com.abbainc.erp.Repository.PedidoRepository;
 import com.abbainc.erp.Repository.VariacaoProdutoRepository;
 import com.mercadopago.MercadoPagoConfig;
-import com.mercadopago.client.preference.*;
+import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
+import com.mercadopago.client.preference.PreferenceClient;
+import com.mercadopago.client.preference.PreferenceItemRequest;
+import com.mercadopago.client.preference.PreferencePayerRequest;
+import com.mercadopago.client.preference.PreferenceRequest;
 import com.mercadopago.resources.preference.Preference;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.annotation.PostConstruct;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +50,6 @@ public class CheckoutService {
 
     @Transactional
     public String gerarLinkPagamento(PedidoSiteRequestDTO request) throws Exception {
-
-        // 1. GERENCIAMENTO DO CLIENTE (Busca pelo WhatsApp único ou cria um novo)
         Cliente cliente = clienteRepository.findByWhatsapp(request.getCliente().getTelefone())
                 .orElseGet(() -> {
                     Cliente novoCliente = new Cliente();
@@ -53,20 +59,16 @@ public class CheckoutService {
                     return clienteRepository.save(novoCliente);
                 });
 
-        // 2. PREPARAÇÃO DO PEDIDO
         Pedido novoPedido = new Pedido();
         novoPedido.setCliente(cliente);
         novoPedido.setFormaPagamento(FormaPagamento.MERCADO_PAGO);
 
         List<PreferenceItemRequest> itensMercadoPago = new ArrayList<>();
 
-        // 3. PREPARAÇÃO DOS ITENS
         for (ItemPedidoSiteDTO itemSite : request.getItens()) {
-
             VariacaoProduto variacao = variacaoRepository.findById(itemSite.getVariacaoProdutoId())
                     .orElseThrow(() -> new RuntimeException("Variação de produto não encontrada ID: " + itemSite.getVariacaoProdutoId()));
 
-            // Item blindado para o Mercado Pago
             PreferenceItemRequest itemMP = PreferenceItemRequest.builder()
                     .title("ABBAINC - " + variacao.getProduto().getModelo() + " (Tam: " + variacao.getTamanho() + ")")
                     .quantity(itemSite.getQuantidade())
@@ -76,20 +78,17 @@ public class CheckoutService {
 
             itensMercadoPago.add(itemMP);
 
-            // Item para o seu ERP
             ItemPedido itemLocal = new ItemPedido();
             itemLocal.setVariacaoProduto(variacao);
             itemLocal.setQuantidade(itemSite.getQuantidade());
             itemLocal.setPrecoUnitario(variacao.getProduto().getPreco());
-            itemLocal.setPedido(novoPedido); // Amarração bidirecional
+            itemLocal.setPedido(novoPedido);
 
             novoPedido.getItens().add(itemLocal);
         }
 
-        // 4. PASSO CRUCIAL: Salva o pedido ANTES para gerar o ID no banco de dados
         novoPedido = pedidoRepository.save(novoPedido);
 
-        // 5. CHAMADA AO MERCADO PAGO (Agora incluindo o externalReference de forma segura)
         PreferencePayerRequest payer = PreferencePayerRequest.builder()
                 .email(request.getCliente().getEmail())
                 .name(request.getCliente().getNome())
@@ -107,7 +106,7 @@ public class CheckoutService {
                 .backUrls(backUrls)
                 .autoReturn("approved")
                 .statementDescriptor("ABBAINC")
-                .externalReference(novoPedido.getId().toString()) // <--- LIGAÇÃO FEITA AQUI!
+                .externalReference(novoPedido.getId().toString())
                 .notificationUrl("https://abbainc-backend.onrender.com/api/webhooks")
                 .build();
 

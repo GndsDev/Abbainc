@@ -20,7 +20,6 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/uploads/**").addResourceLocations(uploadPath);
     }
 
-    // AQUI ESTÁ A MÁGICA DO CORS!
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
