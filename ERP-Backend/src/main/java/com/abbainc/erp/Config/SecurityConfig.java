@@ -39,11 +39,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/webhooks/**").permitAll()
-                        .requestMatchers("/api/produtos/**").permitAll()
+                        .requestMatchers("/api/site/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
-                        .requestMatchers("/api/site").permitAll()
-                        .requestMatchers("/api/site/comprar").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/produtos/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
@@ -58,8 +57,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://abbainc.online",
                 "http://localhost:4200",
-                "https://abbainc.vercel.app",
-                "https://astounding-granita-ddc946.netlify.app"
+                "https://abbainc.vercel.app"
         ));
 
         // Liberta os métodos necessários
