@@ -41,4 +41,7 @@ public class Produto {
     @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("produto")
     private List<VariacaoProduto> variacoes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProdutoImagem> imagens = new ArrayList<>();
 }

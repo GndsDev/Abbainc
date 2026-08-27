@@ -1,18 +1,27 @@
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 
-import { Clientes } from './clientes';
+import { ClienteService } from '../../services/cliente';
+import { ToastService } from '../../services/toast';
+import { ClientesComponent } from './clientes';
 
-describe('Clientes', () => {
-  let component: Clientes;
-  let fixture: ComponentFixture<Clientes>;
+describe('ClientesComponent', () => {
+  let component: ClientesComponent;
+  let fixture: ComponentFixture<ClientesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Clientes]
+      imports: [ClientesComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ClienteService, useValue: { listarClientes: () => of([]) } },
+        { provide: ToastService, useValue: { mostrar: jasmine.createSpy('mostrar') } },
+      ],
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Clientes);
+    fixture = TestBed.createComponent(ClientesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

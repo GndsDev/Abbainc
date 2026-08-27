@@ -56,6 +56,7 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://abbainc.online",
+                "https://www.abbainc.online",
                 "http://localhost:4200",
                 "https://abbainc.vercel.app"
         ));
@@ -71,7 +72,7 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
-            throw new IllegalStateException("ERP_SECURITY_USER e ERP_SECURITY_PASSWORD precisam estar configurados.");
+            throw new IllegalStateException("ERP_USER e ERP_SECURITY_PASSWORD precisam estar configurados.");
         }
 
         UserDetails user = User.withUsername(username)

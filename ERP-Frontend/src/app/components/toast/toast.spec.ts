@@ -1,18 +1,20 @@
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Toast } from './toast';
+import { ToastComponent } from './toast';
 
-describe('Toast', () => {
-  let component: Toast;
-  let fixture: ComponentFixture<Toast>;
+describe('ToastComponent', () => {
+  let component: ToastComponent;
+  let fixture: ComponentFixture<ToastComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Toast]
+      imports: [ToastComponent],
+      providers: [provideZonelessChangeDetection()],
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Toast);
+    fixture = TestBed.createComponent(ToastComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
